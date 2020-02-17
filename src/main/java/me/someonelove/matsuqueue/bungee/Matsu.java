@@ -50,6 +50,8 @@ public final class Matsu extends Plugin {
             } catch (Exception e) {
                     getLogger().log(Level.SEVERE, "Error during loading LuckPerms API - perhaps the plugin isn't installed? - " + e);
             }
+        } else {
+            getLogger().log(Level.INFO, "Currently using BungeeCord permissions system - switch to LuckPerms in config.");
         }
         this.getProxy().getPluginManager().registerListener(this, new EventReactions());
         executorService.scheduleWithFixedDelay(() -> {
