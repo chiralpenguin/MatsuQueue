@@ -1,6 +1,5 @@
 package me.someonelove.matsuqueue.bungee.queue.impl;
 
-import com.sun.istack.internal.Nullable;
 import me.someonelove.matsuqueue.bungee.Matsu;
 import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -22,7 +21,7 @@ public class MatsuQueue implements IMatsuQueue {
 
     private LinkedList<UUID> queue = new LinkedList<>();
 
-    public MatsuQueue(String name, int priority, String slots, @Nullable String permission) {
+    public MatsuQueue(String name, int priority, String slots, String permission) {
         this.name = name;
         this.priority = priority;
         this.permission = permission;
