@@ -55,7 +55,11 @@ public final class Matsu extends Plugin {
             getLogger().log(Level.INFO, "Currently using BungeeCord permissions system - switch to LuckPerms in config.");
         }
         this.getProxy().getPluginManager().registerListener(this, new EventReactions());
-        executorService.scheduleWithFixedDelay(() -> {
+        
+        UpdateQueues updateQueues = new UpdateQueues();
+        this.getProxy().getScheduler().schedule(INSTANCE, updateQueues, 30, 10, TimeUnit.SECONDS);
+        
+        /*executorService.scheduleWithFixedDelay(() -> {
             purgeSlots();
             purgeQueues();
             queueServerOk = isServerUp(queueServerInfo);
@@ -73,7 +77,8 @@ public final class Matsu extends Plugin {
                 return;
             }
             CONFIG.slotsMap.forEach((name, slot) -> slot.broadcast(CONFIG.positionMessage.replace("&", "\247")));
-        }, 30L, 15L, TimeUnit.SECONDS);
+        }, 30L, 15L, TimeUnit.SECONDS);*/
+        
         getLogger().log(Level.INFO, "MatsuQueue has loaded.");
     }
 
@@ -83,7 +88,7 @@ public final class Matsu extends Plugin {
             for (UUID slot : cluster.getSlots()) {
                 ProxiedPlayer player = this.getProxy().getPlayer(slot);
                 // Debug
-                getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
+                // getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
                 if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(destinationServerInfo.getName())) {
                     removalList.add(slot);
                     getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
@@ -100,7 +105,7 @@ public final class Matsu extends Plugin {
     			for (UUID id : queue.getQueue()) {
     				ProxiedPlayer player = this.getProxy().getPlayer(id);
     				// Debug
-    				getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
+    				// getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
     				if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(queueServerInfo.getName())) {
     					removalList.add(id);
     					getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
@@ -111,6 +116,33 @@ public final class Matsu extends Plugin {
     	});
     }
 
+    
+    public class UpdateQueues implements Runnable {
+
+		@Override
+		public void run() {
+			purgeSlots();
+            purgeQueues();
+            queueServerOk = isServerUp(queueServerInfo);
+            if (!queueServerOk) {
+                for (ProxiedPlayer player : getProxy().getPlayers()) {
+                    player.disconnect(new TextComponent("\2474The queue server is no longer reachable."));
+                }
+                return;
+            }
+            destinationServerOk = isServerUp(destinationServerInfo);
+            if (!destinationServerOk) {
+                for (ProxiedPlayer player : getProxy().getPlayers()) {
+                    player.disconnect(new TextComponent("\2474The main server is no longer reachable."));
+                }
+                return;
+            }
+            CONFIG.slotsMap.forEach((name, slot) -> slot.broadcast(CONFIG.positionMessage.replace("&", "\247")));
+            getLogger().log(Level.INFO,"Updated queues");
+		}
+    	
+    }
+    
     @Override
     public void onDisable() {
         // Plugin shutdown logic
