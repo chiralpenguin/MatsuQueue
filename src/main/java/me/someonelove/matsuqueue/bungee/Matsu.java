@@ -73,7 +73,7 @@ public final class Matsu extends Plugin {
                 return;
             }
             CONFIG.slotsMap.forEach((name, slot) -> slot.broadcast(CONFIG.positionMessage.replace("&", "\247")));
-        }, 30L, 10L, TimeUnit.SECONDS);
+        }, 30L, 15L, TimeUnit.SECONDS);
         getLogger().log(Level.INFO, "MatsuQueue has loaded.");
     }
 
@@ -83,7 +83,7 @@ public final class Matsu extends Plugin {
             for (UUID slot : cluster.getSlots()) {
                 ProxiedPlayer player = this.getProxy().getPlayer(slot);
                 // Debug
-                // getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
+                getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
                 if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(destinationServerInfo.getName())) {
                     removalList.add(slot);
                     getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
@@ -100,7 +100,7 @@ public final class Matsu extends Plugin {
     			for (UUID id : queue.getQueue()) {
     				ProxiedPlayer player = this.getProxy().getPlayer(id);
     				// Debug
-    				// getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
+    				getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
     				if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(queueServerInfo.getName())) {
     					removalList.add(id);
     					getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
