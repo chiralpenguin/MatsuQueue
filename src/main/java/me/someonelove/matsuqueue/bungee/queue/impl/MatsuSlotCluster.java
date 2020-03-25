@@ -7,6 +7,7 @@ import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.PermissionNode;
+import net.luckperms.api.query.QueryOptions;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Listener;
@@ -42,6 +43,16 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
 
     @Override
     public void queuePlayer(ProxiedPlayer player) {
+<<<<<<< Updated upstream
+=======
+        if (player.hasPermission("matsqueue.skip")) { // TODO Change this permission node
+            player.sendMessage(new TextComponent(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
+            player.connect(Matsu.INSTANCE.getProxy().getServerInfo(Matsu.CONFIG.destinationServerKey));
+            Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " transferred to destination server");
+            return;
+        }
+
+>>>>>>> Stashed changes
         if (!needsQueueing()) {
             occupySlot(player);
             return;
@@ -51,7 +62,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
             for (Map.Entry<String, IMatsuQueue> entry : associatedQueues.entrySet()) {
                 User lplayer;
                 lplayer = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
-                Set<String> perms = lplayer.getNodes().stream()
+                Set<String> perms = lplayer.resolveInheritedNodes(QueryOptions.nonContextual()).stream()
                         .filter(NodeType.PERMISSION::matches).map(NodeType.PERMISSION::cast).map(PermissionNode::getKey).collect(Collectors.toSet());
                 for (String perm : perms) {
                     if (!perm.contains(".") || !perm.startsWith("matsuqueue")) continue;
