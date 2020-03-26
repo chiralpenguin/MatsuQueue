@@ -16,6 +16,7 @@ repositories {
 }
 
 dependencies {
+	compile group: 'com.intellij', name: 'annotations', version: '12.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'net.md-5:bungeecord-api:1.15-SNAPSHOT'
     compile 'net.luckperms:api:5.0'

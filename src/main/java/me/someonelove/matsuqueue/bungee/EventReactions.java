@@ -118,4 +118,6 @@ public class EventReactions implements Listener {
         IMatsuSlotCluster slots = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get("matsuqueue.default."));
         slots.queuePlayer(p);
     }
+    
+    // TODO Add EventHandlers for when a player changes server (or for /server) to remove them from the queue and from their slot
 }

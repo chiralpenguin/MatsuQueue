@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.jetbrains.annotations.Nullable;
+
 public class MatsuQueue implements IMatsuQueue {
 
     public final String name;
@@ -21,7 +23,7 @@ public class MatsuQueue implements IMatsuQueue {
 
     private LinkedList<UUID> queue = new LinkedList<>();
 
-    public MatsuQueue(String name, int priority, String slots, String permission) {
+    public MatsuQueue(String name, int priority, String slots, @Nullable String permission) {
         this.name = name;
         this.priority = priority;
         this.permission = permission;

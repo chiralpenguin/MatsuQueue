@@ -43,7 +43,6 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
 
     @Override
     public void queuePlayer(ProxiedPlayer player) {
-
         if (player.hasPermission("matsqueue.skip")) { // TODO Change this permission node
             player.sendMessage(new TextComponent(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
             player.connect(Matsu.INSTANCE.getProxy().getServerInfo(Matsu.CONFIG.destinationServerKey));
