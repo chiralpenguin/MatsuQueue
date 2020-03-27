@@ -34,7 +34,8 @@ public final class Matsu extends Plugin {
 
     public static boolean queueServerOk = true;
     public static boolean destinationServerOk = true;
-    private static boolean isLuckPermsOk = false;
+    @SuppressWarnings("unused")
+	private static boolean isLuckPermsOk = false;
 
 
     @Override
@@ -46,7 +47,8 @@ public final class Matsu extends Plugin {
         if (CONFIG.useLuckPerms) {
             try {
                 getLogger().log(Level.INFO, "Detected value TRUE for LuckPerms, trying to open API connection...");
-                LuckPerms api = LuckPermsProvider.get();
+                @SuppressWarnings("unused")
+				LuckPerms api = LuckPermsProvider.get();
                 getLogger().log(Level.INFO, "LuckPerms API connection successfully established!");
             } catch (Exception e) {
                     getLogger().log(Level.SEVERE, "Error during loading LuckPerms API - perhaps the plugin isn't installed? - " + e);
@@ -58,27 +60,7 @@ public final class Matsu extends Plugin {
         
         UpdateQueues updateQueues = new UpdateQueues();
         this.getProxy().getScheduler().schedule(INSTANCE, updateQueues, 30, 10, TimeUnit.SECONDS);
-        
-        /*executorService.scheduleWithFixedDelay(() -> {
-            purgeSlots();
-            purgeQueues();
-            queueServerOk = isServerUp(queueServerInfo);
-            if (!queueServerOk) {
-                for (ProxiedPlayer player : getProxy().getPlayers()) {
-                    player.disconnect(new TextComponent("\2474The queue server is no longer reachable."));
-                }
-                return;
-            }
-            destinationServerOk = isServerUp(destinationServerInfo);
-            if (!destinationServerOk) {
-                for (ProxiedPlayer player : getProxy().getPlayers()) {
-                    player.disconnect(new TextComponent("\2474The main server is no longer reachable."));
-                }
-                return;
-            }
-            CONFIG.slotsMap.forEach((name, slot) -> slot.broadcast(CONFIG.positionMessage.replace("&", "\247")));
-        }, 30L, 15L, TimeUnit.SECONDS);*/
-        
+
         getLogger().log(Level.INFO, "MatsuQueue has loaded.");
     }
 
@@ -90,10 +72,11 @@ public final class Matsu extends Plugin {
                 // Debug
                 // getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
                 
-                // if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(destinationServerInfo.getName())) {
-                if (!player.isConnected() || !player.getServer().getInfo().getName().equals(destinationServerInfo.getName())) {
+                if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(destinationServerInfo.getName())) {
                     removalList.add(slot);
-                    getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
+                    if (player != null) {
+                    	getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
+                    }
                 }
             }
             removalList.forEach(cluster::onPlayerLeave);
@@ -109,10 +92,11 @@ public final class Matsu extends Plugin {
     				// Debug
     				// getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
     				
-    				// if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(queueServerInfo.getName())) {
-    				if (!player.isConnected() || !player.getServer().getInfo().getName().equals(queueServerInfo.getName())) {
+    				if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(queueServerInfo.getName())) {
     					removalList.add(id);
-    					getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
+    					if (player != null) {
+    						getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
+    					}
     				}
     			}
     			removalList.forEach(queue::removePlayerFromQueue);
