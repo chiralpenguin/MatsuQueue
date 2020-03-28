@@ -19,8 +19,6 @@ dependencies {
 	compile group: 'com.intellij', name: 'annotations', version: '12.0'
     compile 'net.md-5:bungeecord-api:1.15-SNAPSHOT'
     compile 'net.luckperms:api:5.0'
-    // implementation 'com.github.EmotionalLove:SimpleSettingSystem:e2aaa43f25' <-- This looks unnecessary
-    implementation 'com.github.EmotionalLove:QuickYML:6cb1f648f004f6a29b7cf5ca1c071e67d8a3d7ea'
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens

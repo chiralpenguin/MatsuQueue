@@ -39,4 +39,6 @@ public interface IMatsuSlotCluster {
     void broadcast(String str);
 
     List<UUID> getSlots();
+
+	String getSlotName();
 }

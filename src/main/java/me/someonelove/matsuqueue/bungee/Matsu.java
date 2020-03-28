@@ -2,20 +2,29 @@ package me.someonelove.matsuqueue.bungee;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+
+import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
 
 
 public final class Matsu extends Plugin {
@@ -37,7 +46,8 @@ public final class Matsu extends Plugin {
     @SuppressWarnings("unused")
 	private static boolean isLuckPermsOk = false;
 
-
+    public ScheduledTask UpdateQueueTask = null;
+    
     @Override
     public void onEnable() {
         slotPermissionCache.clear();
@@ -56,10 +66,14 @@ public final class Matsu extends Plugin {
         } else {
             getLogger().log(Level.INFO, "Currently using BungeeCord permissions system - switch to LuckPerms in config.");
         }
+        
+        // Register reload command
+        this.getProxy().getPluginManager().registerCommand(INSTANCE, new ReloadCommand());
+        
         this.getProxy().getPluginManager().registerListener(this, new EventReactions());
         
-        UpdateQueues updateQueues = new UpdateQueues();
-        this.getProxy().getScheduler().schedule(INSTANCE, updateQueues, 30, 10, TimeUnit.SECONDS);
+        // Instantiate queue update task on startup with 30 second delay
+        UpdateQueueTask = this.getProxy().getScheduler().schedule(INSTANCE, new UpdateQueues(), 30, 10, TimeUnit.SECONDS);
 
         getLogger().log(Level.INFO, "MatsuQueue has loaded.");
     }
@@ -103,10 +117,8 @@ public final class Matsu extends Plugin {
     		});
     	});
     }
-
     
     public class UpdateQueues implements Runnable {
-
 		@Override
 		public void run() {
 			purgeSlots();
@@ -131,6 +143,52 @@ public final class Matsu extends Plugin {
     	
     }
     
+    public class ReloadCommand extends Command {
+
+    	public ReloadCommand() {
+    		super("queuereload");
+    	}
+
+    	@Override
+    	public void execute(CommandSender sender, String[] args) {
+    		if (sender instanceof ProxiedPlayer) {
+    			sender.sendMessage(new TextComponent("Unknown command. Type \"/help\" for help."));
+    		}
+    		else {
+    			Map<String, Integer> oldSlots = new HashMap<String, Integer>();
+    			getLogger().log(Level.INFO, "Reloading config.");
+    			getProxy().getScheduler().cancel(UpdateQueueTask);
+    			
+    			getLogger().log(Level.INFO, "Updating slots.");
+    			CONFIG.slotsMap.forEach((str, cluster) -> {
+    				oldSlots.put(cluster.getSlotName(), cluster.getTotalSlots(true));
+    			});
+    			CONFIG = new ConfigurationFile(); // This isn't going to work, individual clusters and queues need to be saved and replaced after config reload. Current full reload breaks this.
+    			CONFIG.slotsMap.forEach((str, cluster) -> {
+    				if (cluster.getTotalSlots(true) > oldSlots.get(cluster.getSlotName())) {
+    					int change;
+    					change = cluster.getTotalSlots(true) - oldSlots.get(cluster.getSlotName());
+    					for (int i=0; i < change; i++) {
+    						List<IMatsuQueue> sorted = cluster.getAssociatedQueues().values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());
+    						int count = 0;
+    						for (IMatsuQueue queue : sorted) {
+    				            if (queue.getQueue().isEmpty()) continue;
+    				            queue.connectFirstPlayerToDestinationServer();
+    				            count ++;
+    				            break;
+    				        }
+    					getLogger().log(Level.INFO,String.format("%o new players filled slot: %s", count, cluster.getSlotName()));
+    					}
+    				}
+    			});
+    			// Instantiate queue update task on startup with 10 second delay
+    			UpdateQueueTask = INSTANCE.getProxy().getScheduler().schedule(INSTANCE, new UpdateQueues(), 10, 10, TimeUnit.SECONDS);
+    			getLogger().log(Level.INFO, "Config reloaded.");
+    		}
+    	}
+    }
+  
+
     @Override
     public void onDisable() {
         // Plugin shutdown logic

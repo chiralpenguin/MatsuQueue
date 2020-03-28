@@ -32,6 +32,11 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
     }
 
     @Override
+    public String getSlotName() {
+    	return name;
+    }
+    
+    @Override
     public int getAvailableSlots() {
         return max - slots.size();
     }
