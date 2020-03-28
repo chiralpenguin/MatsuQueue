@@ -67,8 +67,7 @@ public final class Matsu extends Plugin {
             getLogger().log(Level.INFO, "Currently using BungeeCord permissions system - switch to LuckPerms in config.");
         }
         
-        // Register reload command
-        this.getProxy().getPluginManager().registerCommand(INSTANCE, new ReloadCommand());
+        // this.getProxy().getPluginManager().registerCommand(INSTANCE, new ReloadCommand());
         
         this.getProxy().getPluginManager().registerListener(this, new EventReactions());
         
@@ -143,7 +142,8 @@ public final class Matsu extends Plugin {
     	
     }
     
-    public class ReloadCommand extends Command {
+/* Reload Command - REMOVED FOR FURTHER WORK
+      	public class ReloadCommand extends Command {
 
     	public ReloadCommand() {
     		super("queuereload");
@@ -187,7 +187,7 @@ public final class Matsu extends Plugin {
     		}
     	}
     }
-  
+*/
 
     @Override
     public void onDisable() {
