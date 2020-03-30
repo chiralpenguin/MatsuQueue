@@ -122,7 +122,6 @@ public class EventReactions implements Listener {
     }
     
     @EventHandler
-    // Doesn't work in waterfall? They removed the getFrom method from this event??
     public void onServerChange(ServerSwitchEvent e) {
     	if (e.getFrom() != null ) {
     		if (e.getFrom().getName().equals(Matsu.CONFIG.destinationServerKey)) {

@@ -18,7 +18,7 @@ import java.util.logging.Level;
  */
 public class ConfigurationFile {
 
-    public static final String FILE_NAME = "QueueConfig.yml";
+    public static final String FILE_NAME = "plugins/MatsuQueue/config.yml";
 
     public String queueServerKey;
     public String destinationServerKey;
@@ -26,6 +26,7 @@ public class ConfigurationFile {
     public String positionMessage;
     public String connectingMessage;
     public boolean useLuckPerms;
+    public String bypassPermission;
     public ConcurrentHashMap<String, IMatsuSlotCluster> slotsMap = new ConcurrentHashMap<>();
 
     /**
@@ -43,6 +44,7 @@ public class ConfigurationFile {
                 parser.set("queueServerKey", "queue");
                 parser.set("destinationServerKey", "main");
                 parser.set("luckPerms", "false");
+                parser.set("bypassPermission", "matsuqueue.skip");
                 Matsu.INSTANCE.getLogger().log(Level.INFO, "Currently not using LuckPerms as permission engine - change in config!");
                 // slots
                 parser.set("slots.standard.capacity", 150);
@@ -92,6 +94,7 @@ public class ConfigurationFile {
         connectingMessage = parser.getString("connectingMessage", "&6Connecting to the server...");
         destinationServerKey = parser.getString("destinationServerKey", "main");
         useLuckPerms = Boolean.parseBoolean(parser.getString("luckPerms", "false"));
+        bypassPermission = parser.getString("bypassPermission");
         final List<String> slots = parser.getStringList("slotnames");
         for (final String slot : slots) {
             if (!parser.exists("slots." + slot)) continue;
