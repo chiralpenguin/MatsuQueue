@@ -10,6 +10,7 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
+import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class EventReactions implements Listener {
 
@@ -119,5 +121,26 @@ public class EventReactions implements Listener {
         slots.queuePlayer(p);
     }
     
-    // TODO Add EventHandlers for when a player changes server (or for /server) to remove them from the queue and from their slot
+    @EventHandler
+    // Doesn't work in waterfall? They removed the getFrom method from this event??
+    public void onServerChange(ServerSwitchEvent e) {
+    	if (e.getFrom() != null ) {
+    		if (e.getFrom().getName().equals(Matsu.CONFIG.destinationServerKey)) {
+        		Matsu.CONFIG.slotsMap.forEach((name, slot) -> {
+                    slot.onPlayerLeave(e.getPlayer());
+                    Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Removed player: %s from slot: %s", e.getPlayer().getName(), slot.getSlotName()));
+                });
+        	}
+        	else if (e.getFrom().getName().equals(Matsu.CONFIG.queueServerKey) && !e.getPlayer().getServer().getInfo().getName().equals(Matsu.CONFIG.destinationServerKey)) {
+        		Matsu.CONFIG.slotsMap.forEach((str, cluster) -> {
+            		cluster.getAssociatedQueues().forEach((name, queue) -> {
+            			if (queue.getQueue().contains(e.getPlayer().getUniqueId())) {
+            				queue.removePlayerFromQueue(e.getPlayer());
+                			Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Removed player: %s from queue: %s", e.getPlayer().getName(), queue.getName()));
+            			}
+            		});
+            	});
+        	}
+    	}
+    }
 }
