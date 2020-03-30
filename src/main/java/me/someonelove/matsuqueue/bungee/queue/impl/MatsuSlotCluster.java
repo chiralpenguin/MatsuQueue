@@ -146,11 +146,13 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
 
     protected void releaseSlot(UUID player) {
         slots.remove(player);
-        List<IMatsuQueue> sorted = associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());//.forEach(IMatsuQueue::connectFirstPlayerToDestinationServer);
-        for (IMatsuQueue iMatsuQueue : sorted) {
-            if (iMatsuQueue.getQueue().isEmpty()) continue;
-            iMatsuQueue.connectFirstPlayerToDestinationServer();
-            break;
+        if (this.getAvailableSlots() > 0) {
+        	List<IMatsuQueue> sorted = associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());//.forEach(IMatsuQueue::connectFirstPlayerToDestinationServer);
+            for (IMatsuQueue iMatsuQueue : sorted) {
+                if (iMatsuQueue.getQueue().isEmpty()) continue;
+                iMatsuQueue.connectFirstPlayerToDestinationServer();
+                break;
+            }
         }
     }
 
