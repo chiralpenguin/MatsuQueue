@@ -56,7 +56,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
         if (player.hasPermission(Matsu.CONFIG.bypassPermission)) {
             player.sendMessage(new TextComponent(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
             player.connect(Matsu.INSTANCE.getProxy().getServerInfo(Matsu.CONFIG.destinationServerKey));
-            Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " transferred to destination server");
+            Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " bypassed the queue");
             return;
         }
 
@@ -103,7 +103,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
 
     @Override
     public boolean needsQueueing() {
-        return getAvailableSlots() == 0;
+        return getAvailableSlots() < 1;
     }
 
     @Override
