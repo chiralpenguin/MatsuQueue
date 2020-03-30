@@ -19,6 +19,8 @@ public interface IMatsuSlotCluster {
      * @param global should we include the slots from other instances of IMatsuSlots?
      */
     int getTotalSlots(boolean global);
+    
+	void setTotalSlots(boolean global, int newSlots);
 
     void queuePlayer(ProxiedPlayer player);
 

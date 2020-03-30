@@ -12,10 +12,8 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -30,6 +28,7 @@ import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
 public final class Matsu extends Plugin {
 
     public static ConfigurationFile CONFIG;
+    public ConfigurationFile NEWCONFIG;
     public static Matsu INSTANCE;
     public static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
 
@@ -67,7 +66,7 @@ public final class Matsu extends Plugin {
             getLogger().log(Level.INFO, "Currently using BungeeCord permissions system - switch to LuckPerms in config.");
         }
         
-        // this.getProxy().getPluginManager().registerCommand(INSTANCE, new ReloadCommand());
+        this.getProxy().getPluginManager().registerCommand(INSTANCE, new UpdateSlotsCommand());
         
         this.getProxy().getPluginManager().registerListener(this, new EventReactions());
         
@@ -142,52 +141,51 @@ public final class Matsu extends Plugin {
     	
     }
     
-/* Reload Command - REMOVED FOR FURTHER WORK
-      	public class ReloadCommand extends Command {
+      	public class UpdateSlotsCommand extends Command {
 
-    	public ReloadCommand() {
-    		super("queuereload");
+    	public UpdateSlotsCommand() {
+    		super("updateslots", "matsuqueue.updateslots");
     	}
 
-    	@Override
+    	@SuppressWarnings("static-access")
+		@Override
     	public void execute(CommandSender sender, String[] args) {
     		if (sender instanceof ProxiedPlayer) {
-    			sender.sendMessage(new TextComponent("Unknown command. Type \"/help\" for help."));
+    			sender.sendMessage(new TextComponent("You must run this command from console."));
     		}
     		else {
-    			Map<String, Integer> oldSlots = new HashMap<String, Integer>();
-    			getLogger().log(Level.INFO, "Reloading config.");
-    			getProxy().getScheduler().cancel(UpdateQueueTask);
+    			INSTANCE.getProxy().getScheduler().cancel(UpdateQueueTask);
     			
-    			getLogger().log(Level.INFO, "Updating slots.");
-    			CONFIG.slotsMap.forEach((str, cluster) -> {
-    				oldSlots.put(cluster.getSlotName(), cluster.getTotalSlots(true));
-    			});
-    			CONFIG = new ConfigurationFile(); // This isn't going to work, individual clusters and queues need to be saved and replaced after config reload. Current full reload breaks this.
-    			CONFIG.slotsMap.forEach((str, cluster) -> {
-    				if (cluster.getTotalSlots(true) > oldSlots.get(cluster.getSlotName())) {
-    					int change;
-    					change = cluster.getTotalSlots(true) - oldSlots.get(cluster.getSlotName());
-    					for (int i=0; i < change; i++) {
-    						List<IMatsuQueue> sorted = cluster.getAssociatedQueues().values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());
-    						int count = 0;
-    						for (IMatsuQueue queue : sorted) {
-    				            if (queue.getQueue().isEmpty()) continue;
-    				            queue.connectFirstPlayerToDestinationServer();
-    				            count ++;
-    				            break;
-    				        }
-    					getLogger().log(Level.INFO,String.format("%o new players filled slot: %s", count, cluster.getSlotName()));
+    			INSTANCE.NEWCONFIG = new ConfigurationFile();
+    			INSTANCE.NEWCONFIG.slotsMap.forEach((str, cluster)-> {
+    				int oldSlots = CONFIG.slotsMap.get(cluster.getSlotName()).getTotalSlots(true);
+    				int newSlots = cluster.getTotalSlots(true);
+    				int change = newSlots - oldSlots;
+    				getLogger().log(Level.INFO, String.format("Slot Type %s: Old Slots: %d New Slots: %d", cluster.getSlotName(), oldSlots, newSlots));
+    				INSTANCE.CONFIG.slotsMap.get(cluster.getSlotName()).setTotalSlots(true, newSlots);
+    				if (oldSlots != newSlots) {
+    					if (change > 0) { // If slot capacity has increased
+    						getLogger().log(Level.INFO, String.format("Capacity of slot %s increased by %d", CONFIG.slotsMap.get(cluster.getSlotName()).getSlotName(), change));
+    						for (int i=0; i < change; i++) {
+    							List<IMatsuQueue> sorted = CONFIG.slotsMap.get(cluster.getSlotName()).getAssociatedQueues().values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());//.forEach(IMatsuQueue::connectFirstPlayerToDestinationServer);
+    					        for (IMatsuQueue iMatsuQueue : sorted) {
+    					            if (iMatsuQueue.getQueue().isEmpty()) continue;
+    					            iMatsuQueue.connectFirstPlayerToDestinationServer();
+    					            break;
+    					        }
+    						}
+    					}
+    					else { // If slot capacity has decreased
+    						getLogger().log(Level.INFO, String.format("Capacity of slot %s decreased by %d", cluster.getSlotName(), Math.abs(change)));
     					}
     				}
     			});
     			// Instantiate queue update task on startup with 10 second delay
     			UpdateQueueTask = INSTANCE.getProxy().getScheduler().schedule(INSTANCE, new UpdateQueues(), 10, 10, TimeUnit.SECONDS);
-    			getLogger().log(Level.INFO, "Config reloaded.");
+    			getLogger().log(Level.INFO, "Slots updated.");
     		}
     	}
     }
-*/
 
     @Override
     public void onDisable() {

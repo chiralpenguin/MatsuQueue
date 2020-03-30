@@ -1,5 +1,5 @@
 name: MatsuQueue
-version: 1.0.1
+version: 1.0.2
 load: STARTUP
 main: me.someonelove.matsuqueue.bungee.Matsu
 description: A queue plugin for controlling the player count of survival servers

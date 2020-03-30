@@ -112,7 +112,6 @@ public class YMLParser {
         return this.load(file, type, new ConfigSection());
     }
 
-    @SuppressWarnings("unchecked")
     public boolean load(String file, int type, ConfigSection defaultMap) {
         this.correct = true;
         this.type = type;
@@ -223,7 +222,8 @@ public class YMLParser {
                     break;
                 case YMLParser.ENUM:
                     for (Object o : this.config.entrySet()) {
-                        Map.Entry entry = (Map.Entry) o;
+                        @SuppressWarnings("rawtypes")
+						Map.Entry entry = (Map.Entry) o;
                         content.append(String.valueOf(entry.getKey())).append("\r\n");
                     }
                     break;
@@ -248,7 +248,6 @@ public class YMLParser {
         return this.get(key, null);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T get(String key, T defaultValue) {
         return this.correct ? this.config.get(key, defaultValue) : defaultValue;
     }
@@ -337,11 +336,13 @@ public class YMLParser {
         return config.isBoolean(key);
     }
 
-    public List getList(String key) {
+    @SuppressWarnings("rawtypes")
+	public List getList(String key) {
         return this.getList(key, null);
     }
 
-    public List getList(String key, List defaultList) {
+    @SuppressWarnings("rawtypes")
+	public List getList(String key, List defaultList) {
         return this.correct ? this.config.getList(key, defaultList) : defaultList;
     }
 
@@ -385,7 +386,8 @@ public class YMLParser {
         return config.getShortList(key);
     }
 
-    public List<Map> getMapList(String key) {
+    @SuppressWarnings("rawtypes")
+	public List<Map> getMapList(String key) {
         return config.getMapList(key);
     }
 
@@ -455,7 +457,8 @@ public class YMLParser {
     private String writeProperties() {
         String content = "#Properties Config file\r\n#" + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + "\r\n";
         for (Object o : this.config.entrySet()) {
-            Map.Entry entry = (Map.Entry) o;
+            @SuppressWarnings("rawtypes")
+			Map.Entry entry = (Map.Entry) o;
             Object v = entry.getValue();
             Object k = entry.getKey();
             if (v instanceof Boolean) {
@@ -525,7 +528,8 @@ public class YMLParser {
         remove(key);
     }
 
-    private void parseContent(String content) {
+    @SuppressWarnings("unchecked")
+	private void parseContent(String content) {
         switch (this.type) {
             case YMLParser.PROPERTIES:
                 this.parseProperties(content);
@@ -561,6 +565,7 @@ public class YMLParser {
     }
 }
 
+@SuppressWarnings("serial")
 class ConfigSection extends LinkedHashMap<String, Object> {
 
     /**
@@ -586,7 +591,8 @@ class ConfigSection extends LinkedHashMap<String, Object> {
      *
      * @param map
      */
-    public ConfigSection(LinkedHashMap<String, Object> map) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public ConfigSection(LinkedHashMap<String, Object> map) {
         this();
         if (map == null || map.isEmpty()) return;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -633,7 +639,8 @@ class ConfigSection extends LinkedHashMap<String, Object> {
      * @param defaultValue
      * @return
      */
-    public <T> T get(String key, T defaultValue) {
+    @SuppressWarnings("unchecked")
+	public <T> T get(String key, T defaultValue) {
         if (key == null || key.isEmpty()) return defaultValue;
         if (super.containsKey(key)) return (T) super.get(key);
         String[] keys = key.split("\\.", 2);
@@ -894,7 +901,8 @@ class ConfigSection extends LinkedHashMap<String, Object> {
      * @param key - key (inside) current section
      * @return
      */
-    public List getList(String key) {
+    @SuppressWarnings("rawtypes")
+	public List getList(String key) {
         return this.getList(key, null);
     }
 
@@ -905,7 +913,8 @@ class ConfigSection extends LinkedHashMap<String, Object> {
      * @param defaultList - default value that will returned if section element is not exists
      * @return
      */
-    public List getList(String key, List defaultList) {
+    @SuppressWarnings("rawtypes")
+	public List getList(String key, List defaultList) {
         return this.get(key, defaultList);
     }
 
@@ -926,7 +935,8 @@ class ConfigSection extends LinkedHashMap<String, Object> {
      * @param key - key (inside) current section
      * @return
      */
-    public List<String> getStringList(String key) {
+    @SuppressWarnings("rawtypes")
+	public List<String> getStringList(String key) {
         List value = this.getList(key);
         if (value == null) {
             return new ArrayList<>(0);
@@ -1193,7 +1203,8 @@ class ConfigSection extends LinkedHashMap<String, Object> {
      * @param key - key (inside) current section
      * @return
      */
-    public List<Map> getMapList(String key) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public List<Map> getMapList(String key) {
         List<Map> list = getList(key);
         List<Map> result = new ArrayList<>();
 

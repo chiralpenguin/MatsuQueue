@@ -45,6 +45,11 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
     public int getTotalSlots(boolean global) {
         return max;
     }
+    
+    @Override
+    public void setTotalSlots(boolean global, int newSlots) {
+        max = newSlots;
+    }
 
     @Override
     public void queuePlayer(ProxiedPlayer player) {
