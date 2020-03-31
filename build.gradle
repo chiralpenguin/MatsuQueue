@@ -3,8 +3,8 @@ apply plugin: 'java'
 group = pluginGroup
 version = pluginVersion
 
-sourceCompatibility = '11.6+8'
-targetCompatibility = '11.6+8'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 repositories {
     mavenCentral()
