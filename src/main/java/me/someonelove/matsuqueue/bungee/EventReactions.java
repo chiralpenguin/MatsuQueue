@@ -127,7 +127,7 @@ public class EventReactions implements Listener {
     		if (e.getFrom().getName().equals(Matsu.CONFIG.destinationServerKey)) {
         		Matsu.CONFIG.slotsMap.forEach((name, slot) -> {
                     slot.onPlayerLeave(e.getPlayer());
-                    Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Removed player: %s from slot: %s", e.getPlayer().getName(), slot.getSlotName()));
+                    if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Removed player: %s from slot: %s", e.getPlayer().getName(), slot.getSlotName()));}
                 });
         	}
         	else if (e.getFrom().getName().equals(Matsu.CONFIG.queueServerKey) && !e.getPlayer().getServer().getInfo().getName().equals(Matsu.CONFIG.destinationServerKey)) {
@@ -135,7 +135,7 @@ public class EventReactions implements Listener {
             		cluster.getAssociatedQueues().forEach((name, queue) -> {
             			if (queue.getQueue().contains(e.getPlayer().getUniqueId())) {
             				queue.removePlayerFromQueue(e.getPlayer());
-                			Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Removed player: %s from queue: %s", e.getPlayer().getName(), queue.getName()));
+            				if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Removed player: %s from queue: %s", e.getPlayer().getName(), queue.getName()));}
             			}
             		});
             	});

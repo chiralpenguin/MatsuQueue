@@ -55,7 +55,7 @@ public final class Matsu extends Plugin {
         CONFIG = new ConfigurationFile();
         if (CONFIG.useLuckPerms) {
             try {
-                getLogger().log(Level.INFO, "Detected value TRUE for LuckPerms, trying to open API connection...");
+            	if (CONFIG.verbose) {getLogger().log(Level.INFO, "Detected value TRUE for LuckPerms, trying to open API connection...");}
                 @SuppressWarnings("unused")
 				LuckPerms api = LuckPermsProvider.get();
                 getLogger().log(Level.INFO, "LuckPerms API connection successfully established!");
@@ -72,7 +72,8 @@ public final class Matsu extends Plugin {
         
         // Instantiate queue update task on startup with 30 second delay
         UpdateQueueTask = this.getProxy().getScheduler().schedule(INSTANCE, new UpdateQueues(), 30, 10, TimeUnit.SECONDS);
-
+        if (CONFIG.verbose) {getLogger().log(Level.INFO, "Verbose logging ENABLED. Disable this in config.yml to reduce messages.");}
+        
         getLogger().log(Level.INFO, "MatsuQueue has loaded.");
     }
 
@@ -80,14 +81,11 @@ public final class Matsu extends Plugin {
         List<UUID> removalList = new ArrayList<>();
         CONFIG.slotsMap.forEach((str, cluster) -> {
             for (UUID slot : cluster.getSlots()) {
-                ProxiedPlayer player = this.getProxy().getPlayer(slot);
-                // Debug
-                // getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
-                
+                ProxiedPlayer player = this.getProxy().getPlayer(slot);               
                 if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(destinationServerInfo.getName())) {
                     removalList.add(slot);
                     if (player != null) {
-                    	getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));
+                    	if (CONFIG.verbose) {getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(destinationServerInfo.getName()));}
                     }
                 }
             }
@@ -100,14 +98,11 @@ public final class Matsu extends Plugin {
     	CONFIG.slotsMap.forEach((str, cluster) -> {
     		cluster.getAssociatedQueues().forEach((name, queue) -> {
     			for (UUID id : queue.getQueue()) {
-    				ProxiedPlayer player = this.getProxy().getPlayer(id);
-    				// Debug
-    				// getLogger().log(Level.INFO, player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
-    				
+    				ProxiedPlayer player = this.getProxy().getPlayer(id);   				
     				if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(queueServerInfo.getName())) {
     					removalList.add(id);
     					if (player != null) {
-    						getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));
+    						if (CONFIG.verbose) {getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));}
     					}
     				}
     			}
@@ -136,7 +131,7 @@ public final class Matsu extends Plugin {
                 return;
             }
             CONFIG.slotsMap.forEach((name, slot) -> slot.broadcast(CONFIG.positionMessage.replace("&", "\247")));
-            getLogger().log(Level.INFO,"Updated queues");
+            if (CONFIG.verbose) {getLogger().log(Level.INFO,"Purged queues and updated position messages.");}
 		}
     	
     }
@@ -161,12 +156,12 @@ public final class Matsu extends Plugin {
     				int oldSlots = CONFIG.slotsMap.get(cluster.getSlotName()).getTotalSlots(true);
     				int newSlots = cluster.getTotalSlots(true);
     				int change = newSlots - oldSlots;
-    				getLogger().log(Level.INFO, String.format("Slot Type %s: Old Slots: %d New Slots: %d", cluster.getSlotName(), oldSlots, newSlots));
+    				if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Slot Type %s: Old Slots: %d New Slots: %d", cluster.getSlotName(), oldSlots, newSlots));}
     				INSTANCE.CONFIG.slotsMap.get(cluster.getSlotName()).setTotalSlots(true, newSlots);
     				if (oldSlots != newSlots) {
     					if (change > 0) { // If slot capacity has increased
     						getLogger().log(Level.INFO, String.format("Capacity of slot %s increased by %d", CONFIG.slotsMap.get(cluster.getSlotName()).getSlotName(), change));
-    						for (int i=0; i < change; i++) {
+    						for (int i=0; i < change && !CONFIG.slotsMap.get(cluster.getSlotName()).needsQueueing(); i++) {
     							List<IMatsuQueue> sorted = CONFIG.slotsMap.get(cluster.getSlotName()).getAssociatedQueues().values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());//.forEach(IMatsuQueue::connectFirstPlayerToDestinationServer);
     					        for (IMatsuQueue iMatsuQueue : sorted) {
     					            if (iMatsuQueue.getQueue().isEmpty()) continue;

@@ -34,7 +34,8 @@ public class MatsuQueue implements IMatsuQueue {
     public void addPlayerToQueue(ProxiedPlayer player) {
         queue.add(player.getUniqueId());
         player.sendMessage(new TextComponent(Matsu.CONFIG.serverFullMessage.replace("&", "\247")));
-        Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " placed in queue " + this.name);
+        if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " placed in queue " + this.name);}
+        Matsu.CONFIG.slotsMap.forEach((name, slot) -> slot.broadcast(Matsu.CONFIG.positionMessage.replace("&", "\247"), player));
     }
 
     @Override
@@ -53,7 +54,7 @@ public class MatsuQueue implements IMatsuQueue {
         ProxiedPlayer player = Matsu.INSTANCE.getProxy().getPlayer(queue.getFirst());
         player.sendMessage(new TextComponent(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
         player.connect(Matsu.INSTANCE.getProxy().getServerInfo(Matsu.CONFIG.destinationServerKey));
-        Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " transferred to destination server");
+        if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " transferred to destination server");}
         Matsu.CONFIG.slotsMap.get(slots).occupySlot(player);
         queue.remove(queue.getFirst());
     }

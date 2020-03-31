@@ -56,7 +56,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
         if (player.hasPermission(Matsu.CONFIG.bypassPermission)) {
             player.sendMessage(new TextComponent(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
             player.connect(Matsu.INSTANCE.getProxy().getServerInfo(Matsu.CONFIG.destinationServerKey));
-            Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " bypassed the queue");
+            if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " bypassed the queue");}
             return;
         }
 
@@ -75,7 +75,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
                     if (!perm.contains(".") || !perm.startsWith("matsuqueue")) continue;
                     String[] broken = perm.split("\\.");
                     if (broken.length != 3) continue;
-                    Matsu.INSTANCE.getLogger().log(Level.INFO, perm + " - " + broken[0] + "." + broken[1] + "." + broken[2] + " - " + entry.getValue().getPermission());
+                    if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, perm + " - " + broken[0] + "." + broken[1] + "." + broken[2] + " - " + entry.getValue().getPermission());}
                     if (entry.getValue().getPermission().equals(broken[2])) {
                         entry.getValue().addPlayerToQueue(player);
                         return;
@@ -179,6 +179,23 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
             for (UUID uuid : queue.getQueue()) {
                 ProxiedPlayer player = Matsu.INSTANCE.getProxy().getPlayer(uuid);
                 if (player != null) {
+                    player.sendMessage(new TextComponent(str.replace("{pos}", (integer.get() + 1) + "")));
+                    player.setTabHeader(new TextComponent(queue.getTabHeader().replace("{pos}", (integer.get() + 1) + "")),
+                            new TextComponent(queue.getTabFooter().replace("{pos}", (integer.get() + 1) + "")));
+                }
+                integer.getAndIncrement();
+            }
+        });
+    }
+    
+    @Override
+    public void broadcast(String str, ProxiedPlayer targetPlayer) {
+        AtomicInteger integer = new AtomicInteger(0);
+        associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).forEach(queue -> {
+            for (UUID uuid : queue.getQueue()) {
+                ProxiedPlayer player = Matsu.INSTANCE.getProxy().getPlayer(uuid);
+                if (player != null && player == targetPlayer) {
+                	if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Updating player %s's position.", player.getName()));}
                     player.sendMessage(new TextComponent(str.replace("{pos}", (integer.get() + 1) + "")));
                     player.setTabHeader(new TextComponent(queue.getTabHeader().replace("{pos}", (integer.get() + 1) + "")),
                             new TextComponent(queue.getTabFooter().replace("{pos}", (integer.get() + 1) + "")));

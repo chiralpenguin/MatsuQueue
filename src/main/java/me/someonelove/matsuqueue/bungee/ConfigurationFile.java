@@ -27,6 +27,7 @@ public class ConfigurationFile {
     public String connectingMessage;
     public boolean useLuckPerms;
     public String bypassPermission;
+    public boolean verbose;
     public ConcurrentHashMap<String, IMatsuSlotCluster> slotsMap = new ConcurrentHashMap<>();
 
     /**
@@ -79,6 +80,7 @@ public class ConfigurationFile {
                 slots.add("standard");
                 slots.add("priority");
                 parser.set("slotnames", slots);
+                parser.set("verbose", "true");
                 parser.save();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -95,6 +97,7 @@ public class ConfigurationFile {
         destinationServerKey = parser.getString("destinationServerKey", "main");
         useLuckPerms = Boolean.parseBoolean(parser.getString("luckPerms", "false"));
         bypassPermission = parser.getString("bypassPermission");
+        verbose = Boolean.parseBoolean(parser.getString("verbose"));
         final List<String> slots = parser.getStringList("slotnames");
         for (final String slot : slots) {
             if (!parser.exists("slots." + slot)) continue;
@@ -103,7 +106,7 @@ public class ConfigurationFile {
             slotsMap.put(slot, new MatsuSlotCluster(slot, capacity, permission));
             // "matsuqueue.<slot_tier>."
             Matsu.slotPermissionCache.put("matsuqueue." + permission + ".", slot);
-            Matsu.INSTANCE.getLogger().log(Level.INFO, "Discovered valid slot type " + slot);
+            if (this.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, "Discovered valid slot type " + slot);}
         }
         final List<String> queues = parser.getStringList("queuenames");
         for (final String queue : queues) {
@@ -117,7 +120,7 @@ public class ConfigurationFile {
             q.setTabText(parser.getString("queues." + queue + ".tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n"),
                     parser.getString("queues." + queue + ".tabFooter", "\\n&6You can donate at https://paypal.me/eatsasha for priority access to the server.\\n"));
             slotsMap.get(slot).associateQueue(q);
-            Matsu.INSTANCE.getLogger().log(Level.INFO, "Discovered valid queue " + queue + " associated to slot type " + slot);
+            if (this.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, "Discovered valid queue " + queue + " associated to slot type " + slot);}
         }
         Matsu.destinationServerInfo = Matsu.INSTANCE.getProxy().getServerInfo(this.destinationServerKey);
         Matsu.queueServerInfo = Matsu.INSTANCE.getProxy().getServerInfo(this.queueServerKey);

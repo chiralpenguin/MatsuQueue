@@ -40,7 +40,10 @@ public interface IMatsuSlotCluster {
 
     void broadcast(String str);
 
+	void broadcast(String str, ProxiedPlayer targetPlayer);
+
     List<UUID> getSlots();
 
 	String getSlotName();
+
 }
