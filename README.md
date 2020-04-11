@@ -22,7 +22,7 @@ The Bungeecord network may have other servers running on the network that are un
 The capacity of a slot type can be changed while running, to allow more players to join during peak time or to reduce the playercount if the server is lagging. Simply change the capacity in the configuration file and run "/updateslots" in the console. If the capacity has increased, players will be sent from the queue until the queue is empty or the new capacity is reached. If the capacity has decreased, players will not be sent from the queue server until enough players have left the destination server to meet the new capacity.
 
 ## Setup
-- Ensure you are running the latest version of Bungeecord, availabe [here](https://ci.md-5.net/job/BungeeCord/).
+- Ensure you are running the latest version of Bungeecord, available [here](https://ci.md-5.net/job/BungeeCord/).
 
 - Download the latest JAR file from our [releases](https://github.com/nitricspace/MatsuQueue/releases) and move it to your Bungeecord plugins folder.
 

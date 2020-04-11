@@ -61,17 +61,17 @@ public class ConfigurationFile {
                 parser.set("queues.standard.tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n");
                 parser.set("queues.standard.tabFooter", "\\n&6You can donate at (Donation Link) for priority queue, or for a reserved slot.\\n");
                 // priority queue (standard slots)
-                parser.set("queues.standardpriority.priority", 1);
-                parser.set("queues.standardpriority.slots", "standard");
-                parser.set("queues.standardpriority.permission", "priority");
-                parser.set("queues.standardpriority.tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n");
-                parser.set("queues.standardpriority.tabFooter", "\\n&6Thank you for donating for priority queue!\\n");
-                // standard queue (reserved slots)
                 parser.set("queues.priority.priority", 1);
-                parser.set("queues.priority.slots", "reserved");
-                parser.set("queues.priority.permission", "default");
+                parser.set("queues.priority.slots", "standard");
+                parser.set("queues.priority.permission", "priority");
                 parser.set("queues.priority.tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n");
-                parser.set("queues.priority.tabFooter", "\\n&6Thank yo ufor donating for a reserved slot!\\n");
+                parser.set("queues.priority.tabFooter", "\\n&6Thank you for donating for priority queue!\\n");
+                // reserved queue (reserved slots)
+                parser.set("queues.reserved.priority", 1);
+                parser.set("queues.reserved.slots", "reserved");
+                parser.set("queues.reserved.permission", "reserved");
+                parser.set("queues.reserved.tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n");
+                parser.set("queues.reserved.tabFooter", "\\n&6Thank yo ufor donating for a reserved slot!\\n");
 
                 ArrayList<String> queues = new ArrayList<>();
                 queues.add("standard");
