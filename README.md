@@ -7,7 +7,7 @@ Running a single-world survival server with a large player count can be resource
 This plugin was originally designed for networks with only 2 servers, the destination server and the queue server. This fork adds support for running other servers on your network which you want unaffected by the queue. Players who join the server will be able to use "/server <servername>" or any other custom setup to change to other servers on your network, without affecting the queue. Additionally, more new features have been added to the plugin to help the server owner and to make the experience more streamlined for the players.
 
 ## Features
-This is a non-exhaustive list of this plugin's features. For more detail and setup help, see the [startup guide](https://github.com/nitricspace/MatsuQueue/wiki/Getting-Started).
+This is a non-exhaustive list of this plugin's features.
 
 #### Multiple Slot Types
 The destination server can have multiple "slot types" to assign players to based on their permissions. For example, server may have 80 default slots and 20 reserved slots. With this setup, 80 regular players can join your server before the queue will start for regular players. Players joining with the reserved slot permission will only take up those reserved slots, allowing donors to have their own seperate playerlimit and their own queue.
