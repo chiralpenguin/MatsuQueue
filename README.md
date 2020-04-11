@@ -24,7 +24,7 @@ The capacity of a slot type can be changed while running, to allow more players 
 ## Setup
 - Ensure you are running the latest version of Bungeecord, availabe [here](https://ci.md-5.net/job/BungeeCord/).
 
-- Download the latest JAR file from our [releases](https://github.com/EmotionalLove/MatsuQueueBungee/releases) and move it to your Bungeecord plugins folder.
+- Download the latest JAR file from our [releases](https://github.com/nitricspace/MatsuQueue/releases) and move it to your Bungeecord plugins folder.
 
 - Run the Bungeecord instance to generate the config file, then stop it.
 
