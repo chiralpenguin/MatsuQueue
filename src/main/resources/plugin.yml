@@ -1,6 +1,5 @@
-name: MatsuQueue-nitricspace
-version: 1.0
-load: STARTUP
+name: MatsuQueue
+version: 1.3
 main: me.someonelove.matsuqueue.bungee.Matsu
-description: A queue plugin for controlling the player count of survival servers
-author: Sasha
+description: Fork of MastuQueue adapted for Purity Vanilla
+author: Sasha, updated by nitricspaces
