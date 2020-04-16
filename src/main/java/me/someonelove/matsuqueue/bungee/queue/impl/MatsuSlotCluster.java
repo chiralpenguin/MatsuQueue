@@ -5,6 +5,7 @@ import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
 import me.someonelove.matsuqueue.bungee.queue.IMatsuSlotCluster;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.PermissionNode;
 import net.luckperms.api.query.QueryOptions;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
 
@@ -56,7 +58,9 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
         if (player.hasPermission(Matsu.CONFIG.bypassPermission)) {
             player.sendMessage(new TextComponent(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
             player.connect(Matsu.INSTANCE.getProxy().getServerInfo(Matsu.CONFIG.destinationServerKey));
-            if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " bypassed the queue");}
+            if (Matsu.CONFIG.verbose) {
+                Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " bypassed the queue");
+            }
             return;
         }
 
@@ -65,22 +69,51 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
             return;
         }
 
+        // LuckPerms handling (supported)
         if (Matsu.CONFIG.useLuckPerms) {
+            List<IMatsuQueue> queues = new ArrayList<IMatsuQueue>();
             for (Map.Entry<String, IMatsuQueue> entry : associatedQueues.entrySet()) {
-                User lplayer;
-                lplayer = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
-                Set<String> perms = lplayer.resolveInheritedNodes(QueryOptions.nonContextual()).stream()
-                        .filter(NodeType.PERMISSION::matches).map(NodeType.PERMISSION::cast).map(PermissionNode::getKey).collect(Collectors.toSet());
+                User lplayer = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());;
+                Collection<Node> permissionNodes = lplayer.resolveInheritedNodes(QueryOptions.nonContextual());
+                Set<String> perms = permissionNodes.stream().filter(NodeType.PERMISSION::matches).map(NodeType.PERMISSION::cast).map(PermissionNode::getKey).collect(Collectors.toSet());
+                Set<String> negatedPerms = permissionNodes.stream().filter(Node::isNegated).filter(NodeType.PERMISSION::matches).map(NodeType.PERMISSION::cast).map(PermissionNode::getKey).collect(Collectors.toSet());
+                perms.removeAll(negatedPerms);
+
                 for (String perm : perms) {
                     if (!perm.contains(".") || !perm.startsWith("matsuqueue")) continue;
                     String[] broken = perm.split("\\.");
                     if (broken.length != 3) continue;
-                    if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, perm + " - " + broken[0] + "." + broken[1] + "." + broken[2] + " - " + entry.getValue().getPermission());}
                     if (entry.getValue().getPermission().equals(broken[2])) {
-                        entry.getValue().addPlayerToQueue(player);
-                        return;
+                        queues.add(entry.getValue());
+                        if (Matsu.CONFIG.verbose) {
+                            Matsu.INSTANCE.getLogger().log(Level.INFO, String.format("Player: %s | Node: %s | Queue: %s", player.getName(), entry.getValue().getPermission(), entry.getValue().getName()));
+                        }
                     }
                 }
+            }
+
+            if (queues.size() != 0) {
+                IMatsuQueue topQueue = queues.get(0);
+
+                for (IMatsuQueue queue : queues) {
+                    if (queue != topQueue && queue.getPriority() < topQueue.getPriority()) {
+                        topQueue = queue;
+                    }
+                }
+                topQueue.addPlayerToQueue(player);
+                return;
+            }
+
+            // code quality goes to shit after my brain goes numb ;-;
+            for (Map.Entry<String, IMatsuQueue> entry : associatedQueues.entrySet()) {
+                if (entry.getValue().getPermission().equals("default")) {
+                    entry.getValue().addPlayerToQueue(player);
+                }
+            }
+        }
+        // Alternative permissions system handling (unsupported)
+        else {
+            for (Map.Entry<String, IMatsuQueue> entry : associatedQueues.entrySet()) {
                 for (String permission : player.getPermissions()) {
                     if (!permission.contains(".") || !permission.startsWith("matsuqueue")) continue;
                     String[] broken = permission.split("\\.");
@@ -91,12 +124,11 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
                     }
                 }
             }
-        }
-
-        // code quality goes to shit after my brain goes numb ;-;
-        for (Map.Entry<String, IMatsuQueue> entry : associatedQueues.entrySet()) {
-            if (entry.getValue().getPermission().equals("default")) {
-                entry.getValue().addPlayerToQueue(player);
+            // code quality goes to shit after my brain goes numb ;-;
+            for (Map.Entry<String, IMatsuQueue> entry : associatedQueues.entrySet()) {
+                if (entry.getValue().getPermission().equals("default")) {
+                    entry.getValue().addPlayerToQueue(player);
+                }
             }
         }
     }
