@@ -1,5 +1,6 @@
 package me.someonelove.matsuqueue.bungee;
 
+import me.someonelove.matsuqueue.bungee.queue.impl.MatsuSlotCluster;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.md_5.bungee.api.CommandSender;
@@ -67,6 +68,7 @@ public final class Matsu extends Plugin {
         }
         
         this.getProxy().getPluginManager().registerCommand(INSTANCE, new UpdateSlotsCommand());
+        this.getProxy().getPluginManager().registerCommand(INSTANCE, new DebugQueuesCommand());
         
         this.getProxy().getPluginManager().registerListener(this, new EventReactions());
         
@@ -81,7 +83,7 @@ public final class Matsu extends Plugin {
         List<UUID> removalList = new ArrayList<>();
         CONFIG.slotsMap.forEach((str, cluster) -> {
             for (UUID slot : cluster.getSlots()) {
-                ProxiedPlayer player = this.getProxy().getPlayer(slot);               
+                ProxiedPlayer player = this.getProxy().getPlayer(slot);
                 if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(destinationServerInfo.getName())) {
                     removalList.add(slot);
                     if (player != null) {
@@ -98,7 +100,7 @@ public final class Matsu extends Plugin {
     	CONFIG.slotsMap.forEach((str, cluster) -> {
     		cluster.getAssociatedQueues().forEach((name, queue) -> {
     			for (UUID id : queue.getQueue()) {
-    				ProxiedPlayer player = this.getProxy().getPlayer(id);   				
+    				ProxiedPlayer player = this.getProxy().getPlayer(id);
     				if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(queueServerInfo.getName())) {
     					removalList.add(id);
     					if (player != null) {
@@ -137,7 +139,6 @@ public final class Matsu extends Plugin {
     }
     
       	public class UpdateSlotsCommand extends Command {
-
     	public UpdateSlotsCommand() {
     		super("updateslots", "matsuqueue.updateslots");
     	}
@@ -147,39 +148,69 @@ public final class Matsu extends Plugin {
     	public void execute(CommandSender sender, String[] args) {
     		if (sender instanceof ProxiedPlayer) {
     			sender.sendMessage(new TextComponent("You must run this command from console."));
+    			return;
     		}
-    		else {
-    			INSTANCE.getProxy().getScheduler().cancel(UpdateQueueTask);
-    			
-    			INSTANCE.NEWCONFIG = new ConfigurationFile();
-    			INSTANCE.NEWCONFIG.slotsMap.forEach((str, cluster)-> {
-    				int oldSlots = CONFIG.slotsMap.get(cluster.getSlotName()).getTotalSlots(true);
-    				int newSlots = cluster.getTotalSlots(true);
-    				int change = newSlots - oldSlots;
-    				if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Slot Type %s: Old Slots: %d New Slots: %d", cluster.getSlotName(), oldSlots, newSlots));}
-    				INSTANCE.CONFIG.slotsMap.get(cluster.getSlotName()).setTotalSlots(true, newSlots);
-    				if (oldSlots != newSlots) {
-    					if (change > 0) { // If slot capacity has increased
-    						getLogger().log(Level.INFO, String.format("Capacity of slot %s increased by %d", CONFIG.slotsMap.get(cluster.getSlotName()).getSlotName(), change));
-    						for (int i=0; i < change && !CONFIG.slotsMap.get(cluster.getSlotName()).needsQueueing(); i++) {
-    							List<IMatsuQueue> sorted = CONFIG.slotsMap.get(cluster.getSlotName()).getAssociatedQueues().values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());//.forEach(IMatsuQueue::connectFirstPlayerToDestinationServer);
-    					        for (IMatsuQueue iMatsuQueue : sorted) {
-    					            if (iMatsuQueue.getQueue().isEmpty()) continue;
-    					            iMatsuQueue.connectFirstPlayerToDestinationServer();
-    					            break;
-    					        }
-    						}
-    					}
-    					else { // If slot capacity has decreased
-    						getLogger().log(Level.INFO, String.format("Capacity of slot %s decreased by %d", cluster.getSlotName(), Math.abs(change)));
-    					}
-    				}
-    			});
-    			// Instantiate queue update task on startup with 10 second delay
-    			UpdateQueueTask = INSTANCE.getProxy().getScheduler().schedule(INSTANCE, new UpdateQueues(), 10, 10, TimeUnit.SECONDS);
-    			getLogger().log(Level.INFO, "Slots updated.");
-    		}
+            INSTANCE.getProxy().getScheduler().cancel(UpdateQueueTask);
+
+            INSTANCE.NEWCONFIG = new ConfigurationFile();
+            INSTANCE.NEWCONFIG.slotsMap.forEach((str, cluster)-> {
+                int oldSlots = CONFIG.slotsMap.get(cluster.getSlotName()).getTotalSlots(true);
+                int newSlots = cluster.getTotalSlots(true);
+                int change = newSlots - oldSlots;
+                if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Slot Type %s: Old Slots: %d New Slots: %d", cluster.getSlotName(), oldSlots, newSlots));}
+                INSTANCE.CONFIG.slotsMap.get(cluster.getSlotName()).setTotalSlots(true, newSlots);
+                if (oldSlots != newSlots) {
+                    if (change > 0) { // If slot capacity has increased
+                        getLogger().log(Level.INFO, String.format("Capacity of slot %s increased by %d", CONFIG.slotsMap.get(cluster.getSlotName()).getSlotName(), change));
+                        for (int i=0; i < change && !CONFIG.slotsMap.get(cluster.getSlotName()).needsQueueing(); i++) {
+                            List<IMatsuQueue> sorted = CONFIG.slotsMap.get(cluster.getSlotName()).getAssociatedQueues().values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());//.forEach(IMatsuQueue::connectFirstPlayerToDestinationServer);
+                            for (IMatsuQueue iMatsuQueue : sorted) {
+                                if (iMatsuQueue.getQueue().isEmpty()) continue;
+                                iMatsuQueue.connectFirstPlayerToDestinationServer();
+                                break;
+                            }
+                        }
+                    }
+                    else { // If slot capacity has decreased
+                        getLogger().log(Level.INFO, String.format("Capacity of slot %s decreased by %d", cluster.getSlotName(), Math.abs(change)));
+                    }
+                }
+            });
+            // Instantiate queue update task on startup with 10 second delay
+            UpdateQueueTask = INSTANCE.getProxy().getScheduler().schedule(INSTANCE, new UpdateQueues(), 10, 10, TimeUnit.SECONDS);
+            getLogger().log(Level.INFO, "Slots updated.");
     	}
+    }
+
+    public class DebugQueuesCommand extends Command {
+        public DebugQueuesCommand() {
+            super("queuedebug", "matsuqueue.debug");
+        }
+
+        @Override
+        public void execute(CommandSender sender, String[] args) {
+            if (sender instanceof ProxiedPlayer) {
+                sender.sendMessage(new TextComponent("You must run this command from console."));
+                return;
+            }
+
+            CONFIG.slotsMap.forEach((slotname, cluster) -> {
+                INSTANCE.getLogger().log(Level.INFO, String.format("Slot: %s (%s)", cluster.getSlotName(), cluster.getSlots().size()));
+                for(UUID slot : cluster.getSlots()) {
+                    INSTANCE.getLogger().log(Level.INFO,String.format("- %s", INSTANCE.getProxy().getPlayer(slot)));
+                }
+
+                cluster.getAssociatedQueues().forEach((queuename, queue) -> {
+                    INSTANCE.getLogger().log(Level.INFO, String.format("Queue: %s (%s)", queue.getName(), queue.getQueue().size()));
+                    for (UUID player : queue.getQueue()) {
+                        INSTANCE.getLogger().log(Level.INFO, String.format("- %s", INSTANCE.getProxy().getPlayer(player)));
+                    }
+                    INSTANCE.getLogger().log(Level.INFO, "\n");
+                });
+                INSTANCE.getLogger().log(Level.INFO, "\n");
+            });
+        }
+
     }
 
     @Override
