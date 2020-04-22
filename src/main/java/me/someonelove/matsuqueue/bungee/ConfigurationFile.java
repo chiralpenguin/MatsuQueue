@@ -27,6 +27,7 @@ public class ConfigurationFile {
     public String connectingMessage;
     public boolean useLuckPerms;
     public String bypassPermission;
+    public boolean perQueuePos;
     public boolean verbose;
     public ConcurrentHashMap<String, IMatsuSlotCluster> slotsMap = new ConcurrentHashMap<>();
 
@@ -48,6 +49,7 @@ public class ConfigurationFile {
                 parser.set("useLuckPerms", "false");
                 Matsu.INSTANCE.getLogger().log(Level.INFO, "Currently not using LuckPerms as permission engine - change in config!");
                 parser.set("bypassPermission", "matsuqueue.skip");
+                parser.set("perQueuePosition", "true");
                 parser.set("verbose", "false");
                 // slots
                 parser.set("slots.standard.capacity", 100);
@@ -98,6 +100,7 @@ public class ConfigurationFile {
         destinationServerKey = parser.getString("destinationServerKey", "main");
         useLuckPerms = Boolean.parseBoolean(parser.getString("useLuckPerms", "false"));
         bypassPermission = parser.getString("bypassPermission");
+        perQueuePos = Boolean.parseBoolean(parser.getString("perQueuePosition"));
         verbose = Boolean.parseBoolean(parser.getString("verbose", "false"));
         final List<String> slots = parser.getStringList("slotnames");
         for (final String slot : slots) {

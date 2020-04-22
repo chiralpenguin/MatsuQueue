@@ -96,7 +96,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
                 IMatsuQueue topQueue = queues.get(0);
 
                 for (IMatsuQueue queue : queues) {
-                    if (queue != topQueue && queue.getPriority() < topQueue.getPriority()) {
+                    if (queue.getPriority() < topQueue.getPriority()) {
                         topQueue = queue;
                     }
                 }
@@ -160,9 +160,6 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
         });
     }
 
-
-    // these shouldn't be called by public code.
-
     @Override
     public void occupySlot(ProxiedPlayer player) {
         this.occupySlot(player.getUniqueId());
@@ -179,12 +176,35 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
     protected void releaseSlot(UUID player) {
         slots.remove(player);
         if (this.getAvailableSlots() > 0) {
-        	List<IMatsuQueue> sorted = associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());//.forEach(IMatsuQueue::connectFirstPlayerToDestinationServer);
-            for (IMatsuQueue iMatsuQueue : sorted) {
-                if (iMatsuQueue.getQueue().isEmpty()) continue;
-                iMatsuQueue.connectFirstPlayerToDestinationServer();
-                break;
+        	connectHighestPriorityPlayer();
+        }
+    }
+
+    public HashSet<UUID> removeDuplicateSlots() { // TODO Actually debug the root cause of this issue, this fix is not elegant and could break
+        List<UUID> duplicates = new ArrayList<>();
+
+        for (UUID slot : slots) {
+            if (Collections.frequency(slots, slot) > 1) {
+                duplicates.add(slot);
             }
+        }
+        slots.removeAll(duplicates);
+        HashSet<UUID> duplicateSet = new HashSet<>(duplicates);
+        slots.addAll(duplicateSet);
+
+        while (!needsQueueing()) {
+            connectHighestPriorityPlayer();
+        }
+
+        return duplicateSet;
+    }
+
+    public void connectHighestPriorityPlayer() {
+        List<IMatsuQueue> sorted = associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());
+        for (IMatsuQueue iMatsuQueue : sorted) {
+            if (iMatsuQueue.getQueue().isEmpty()) continue;
+            iMatsuQueue.connectFirstPlayerToDestinationServer();
+            break;
         }
     }
 
@@ -206,33 +226,38 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
 
     @Override
     public void broadcast(String str) {
-        AtomicInteger integer = new AtomicInteger(0);
+        AtomicInteger pos = new AtomicInteger(0);
         associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).forEach(queue -> {
             for (UUID uuid : queue.getQueue()) {
                 ProxiedPlayer player = Matsu.INSTANCE.getProxy().getPlayer(uuid);
                 if (player != null) {
-                    player.sendMessage(new TextComponent(str.replace("{pos}", (integer.get() + 1) + "")));
-                    player.setTabHeader(new TextComponent(queue.getTabHeader().replace("{pos}", (integer.get() + 1) + "")),
-                            new TextComponent(queue.getTabFooter().replace("{pos}", (integer.get() + 1) + "")));
+                    player.sendMessage(new TextComponent(str.replace("{pos}", (pos.get() + 1) + "")));
+                    player.setTabHeader(new TextComponent(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
+                            new TextComponent(queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "")));
                 }
-                integer.getAndIncrement();
+                pos.getAndIncrement();
+            }
+            if (Matsu.CONFIG.perQueuePos) {
+                pos.set(0);
             }
         });
     }
-    
+
     @Override
     public void broadcast(String str, ProxiedPlayer targetPlayer) {
-        AtomicInteger integer = new AtomicInteger(0);
+        AtomicInteger pos = new AtomicInteger(0);
         associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).forEach(queue -> {
             for (UUID uuid : queue.getQueue()) {
                 ProxiedPlayer player = Matsu.INSTANCE.getProxy().getPlayer(uuid);
                 if (player != null && player == targetPlayer) {
-                	if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Updating player %s's position.", player.getName()));}
-                    player.sendMessage(new TextComponent(str.replace("{pos}", (integer.get() + 1) + "")));
-                    player.setTabHeader(new TextComponent(queue.getTabHeader().replace("{pos}", (integer.get() + 1) + "")),
-                            new TextComponent(queue.getTabFooter().replace("{pos}", (integer.get() + 1) + "")));
+                    player.sendMessage(new TextComponent(str.replace("{pos}", (pos.get() + 1) + "")));
+                    player.setTabHeader(new TextComponent(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
+                            new TextComponent(queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "")));
                 }
-                integer.getAndIncrement();
+                pos.getAndIncrement();
+            }
+            if (Matsu.CONFIG.perQueuePos) {
+                pos.set(0);
             }
         });
     }

@@ -2,6 +2,7 @@ package me.someonelove.matsuqueue.bungee.queue;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +34,10 @@ public interface IMatsuSlotCluster {
     void occupySlot(ProxiedPlayer player);
 
     void associateQueue(IMatsuQueue queue);
+
+    HashSet<UUID> removeDuplicateSlots();
+
+    void connectHighestPriorityPlayer();
 
     ConcurrentHashMap<String, IMatsuQueue> getAssociatedQueues();
 

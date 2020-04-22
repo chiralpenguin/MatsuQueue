@@ -11,11 +11,7 @@ import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -92,6 +88,12 @@ public final class Matsu extends Plugin {
                 }
             }
             removalList.forEach(cluster::onPlayerLeave);
+            HashSet<UUID> duplicates = cluster.removeDuplicateSlots();
+            if (duplicates.size() != 0) {
+                for (UUID duplicate : duplicates) {
+                    if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Player %s was using multiple slots!", this.getProxy().getPlayer(duplicate).getName()));}
+                }
+            }
         });
     }
     
@@ -138,7 +140,7 @@ public final class Matsu extends Plugin {
     	
     }
     
-      	public class UpdateSlotsCommand extends Command {
+    public class UpdateSlotsCommand extends Command {
     	public UpdateSlotsCommand() {
     		super("updateslots", "matsuqueue.updateslots");
     	}
@@ -163,14 +165,9 @@ public final class Matsu extends Plugin {
                     if (change > 0) { // If slot capacity has increased
                         getLogger().log(Level.INFO, String.format("Capacity of slot %s increased by %d", CONFIG.slotsMap.get(cluster.getSlotName()).getSlotName(), change));
                         for (int i=0; i < change && !CONFIG.slotsMap.get(cluster.getSlotName()).needsQueueing(); i++) {
-                            List<IMatsuQueue> sorted = CONFIG.slotsMap.get(cluster.getSlotName()).getAssociatedQueues().values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());//.forEach(IMatsuQueue::connectFirstPlayerToDestinationServer);
-                            for (IMatsuQueue iMatsuQueue : sorted) {
-                                if (iMatsuQueue.getQueue().isEmpty()) continue;
-                                iMatsuQueue.connectFirstPlayerToDestinationServer();
-                                break;
+                            CONFIG.slotsMap.get(cluster.getSlotName()).connectHighestPriorityPlayer();
                             }
                         }
-                    }
                     else { // If slot capacity has decreased
                         getLogger().log(Level.INFO, String.format("Capacity of slot %s decreased by %d", cluster.getSlotName(), Math.abs(change)));
                     }
