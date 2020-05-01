@@ -1,17 +1,20 @@
 package me.someonelove.matsuqueue.bungee;
 
+import com.sun.corba.se.impl.protocol.INSServerRequestDispatcher;
 import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
 import me.someonelove.matsuqueue.bungee.queue.IMatsuSlotCluster;
 import me.someonelove.matsuqueue.bungee.queue.impl.MatsuQueue;
 import me.someonelove.matsuqueue.bungee.queue.impl.MatsuSlotCluster;
 import me.someonelove.quickyml.YMLParser;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+
+import static java.lang.Thread.currentThread;
 
 /**
  * I'm really sorry but i strongly dislike BungeeCord's YML stuff.
@@ -39,59 +42,17 @@ public class ConfigurationFile {
         file.getParentFile().mkdirs();
         if (!file.exists()) {
             try {
-                file.createNewFile();
-                YMLParser parser = new YMLParser(file);
-                parser.set("serverFullMessage", "&6Server is full");
-                parser.set("connectingMessage", "&6Connecting to the server...");
-                parser.set("positionMessage", "&6Your position in queue is &l{pos}");
-                parser.set("queueServerKey", "queue");
-                parser.set("destinationServerKey", "main");
-                parser.set("useLuckPerms", "false");
-                Matsu.INSTANCE.getLogger().log(Level.INFO, "Currently not using LuckPerms as permission engine - change in config!");
-                parser.set("bypassPermission", "matsuqueue.skip");
-                parser.set("perQueuePosition", "true");
-                parser.set("verbose", "false");
-                // slots
-                parser.set("slots.standard.capacity", 100);
-                parser.set("slots.standard.permission", "default");
-                parser.set("slots.reserved.capacity", 20);
-                parser.set("slots.reserved.permission", "reserved");
-                // standard queue
-                parser.set("queues.standard.priority", 2);
-                parser.set("queues.standard.slots", "standard");
-                parser.set("queues.standard.permission", "default");
-                parser.set("queues.standard.tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n");
-                parser.set("queues.standard.tabFooter", "\\n&6You can donate at (Donation Link) for priority queue, or for a reserved slot.\\n");
-                // priority queue (standard slots)
-                parser.set("queues.priority.priority", 1);
-                parser.set("queues.priority.slots", "standard");
-                parser.set("queues.priority.permission", "priority");
-                parser.set("queues.priority.tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n");
-                parser.set("queues.priority.tabFooter", "\\n&6Thank you for donating for priority queue!\\n");
-                // reserved queue (reserved slots)
-                parser.set("queues.reserved.priority", 1);
-                parser.set("queues.reserved.slots", "reserved");
-                parser.set("queues.reserved.permission", "reserved");
-                parser.set("queues.reserved.tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n");
-                parser.set("queues.reserved.tabFooter", "\\n&6Thank yo ufor donating for a reserved slot!\\n");
-
-                ArrayList<String> queues = new ArrayList<>();
-                queues.add("standard");
-                queues.add("priority");
-                queues.add("reserved");
-                parser.set("queuenames", queues);
-                ArrayList<String> slots = new ArrayList<>();
-                slots.add("standard");
-                slots.add("reserved");
-                parser.set("slotnames", slots);
-                parser.save();
-            } catch (IOException e) {
+                InputStream configStream = getClass().getResourceAsStream("/default_config.yml");
+                Files.copy(configStream, Paths.get(file.toURI()));
+            }
+            catch (IOException e) {
                 e.printStackTrace();
                 Matsu.INSTANCE.getLogger().log(Level.SEVERE, "Couldn't initialise default configuration file! Cannot continue!");
                 Matsu.INSTANCE.getProxy().stop();
                 return;
             }
         }
+
         YMLParser parser = new YMLParser(file);
         serverFullMessage = parser.getString("serverFullMessage", "&6Server is full");
         queueServerKey = parser.getString("queueServerKey", "queue");

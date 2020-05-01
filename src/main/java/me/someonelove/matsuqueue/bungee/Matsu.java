@@ -120,6 +120,15 @@ public final class Matsu extends Plugin {
 		public void run() {
 			purgeSlots();
             purgeQueues();
+
+            /* TODO Test and implement this feature, may cause issues but was intended to fix players stil in queue after restarts
+            Matsu.CONFIG.slotsMap.forEach((str, cluster) -> {
+                while (!cluster.needsQueueing()) {
+                    cluster.connectHighestPriorityPlayer();
+                }
+            });
+            */
+
             queueServerOk = isServerUp(queueServerInfo);
             if (!queueServerOk) {
                 for (ProxiedPlayer player : getProxy().getPlayers()) {
