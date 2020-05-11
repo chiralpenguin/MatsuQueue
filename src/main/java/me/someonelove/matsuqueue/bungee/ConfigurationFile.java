@@ -25,19 +25,20 @@ public class ConfigurationFile {
 
     public String queueServerKey;
     public String destinationServerKey;
-    public String serverFullMessage;
-    public String positionMessage;
-    public String connectingMessage;
     public boolean useLuckPerms;
     public String bypassPermission;
     public boolean perQueuePos;
     public boolean verbose;
+    public String serverFullMessage;
+    public String connectingMessage;
+    public String positionMessage;
+    public String leaveMessage;
+    public String leaveErrorMessage;
+    public String joinMessage;
+    public String joinErrorMessage;
     public ConcurrentHashMap<String, IMatsuSlotCluster> slotsMap = new ConcurrentHashMap<>();
 
-    /**
-     * this is a mess please forgive me as i have sinned.
-     */
-    protected ConfigurationFile() {
+    public ConfigurationFile() {
         File file = new File(FILE_NAME);
         file.getParentFile().mkdirs();
         if (!file.exists()) {
@@ -54,15 +55,19 @@ public class ConfigurationFile {
         }
 
         YMLParser parser = new YMLParser(file);
-        serverFullMessage = parser.getString("serverFullMessage", "&6Server is full");
         queueServerKey = parser.getString("queueServerKey", "queue");
-        positionMessage = parser.getString("positionMessage", "&6Your position in queue is &l{pos}");
-        connectingMessage = parser.getString("connectingMessage", "&6Connecting to the server...");
         destinationServerKey = parser.getString("destinationServerKey", "main");
         useLuckPerms = Boolean.parseBoolean(parser.getString("useLuckPerms", "false"));
         bypassPermission = parser.getString("bypassPermission");
         perQueuePos = Boolean.parseBoolean(parser.getString("perQueuePosition"));
         verbose = Boolean.parseBoolean(parser.getString("verbose", "false"));
+        serverFullMessage = parser.getString("serverFullMessage", "&6Server is full");
+        connectingMessage = parser.getString("connectingMessage", "&6Connecting to the server...");
+        positionMessage = parser.getString("positionMessage", "&6Your position in queue is &l{pos}");
+        leaveMessage = parser.getString("queueLeaveMessage", "&6You have left the queue. Do &5/queuejoin &6to rejoin");
+        leaveErrorMessage = parser.getString("queueLeaveErrorMessage", "&6You are not in the queue! Do &5/queuejoin&6 to join.");
+        joinMessage = parser.getString("queueJoinMessage", "&6You have rejoined the queue. Do &5/queueleave &6to leave.");
+        joinErrorMessage = parser.getString("queueJoinErrorMessage", "&6You are already in the queue or destination server! Do &5/queueleave &6to leave.");
         final List<String> slots = parser.getStringList("slotnames");
         for (final String slot : slots) {
             if (!parser.exists("slots." + slot)) continue;

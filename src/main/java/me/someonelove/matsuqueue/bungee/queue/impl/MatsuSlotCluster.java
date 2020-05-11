@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
 
@@ -166,6 +165,11 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
     }
 
     protected void occupySlot(UUID player) {
+        if (slots.contains(player)) {
+            if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, String.format("Tried to assign %s to a slot they are already in!", Matsu.INSTANCE.getProxy().getPlayer(player).getName()));}
+            return;
+        }
+
         slots.add(player);
     }
 
@@ -180,7 +184,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
         }
     }
 
-    public HashSet<UUID> removeDuplicateSlots() { // TODO Actually debug the root cause of this issue, this fix is not elegant and could break
+    public HashSet<UUID> removeDuplicateSlots() {
         List<UUID> duplicates = new ArrayList<>();
 
         for (UUID slot : slots) {
@@ -188,6 +192,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
                 duplicates.add(slot);
             }
         }
+
         slots.removeAll(duplicates);
         HashSet<UUID> duplicateSet = new HashSet<>(duplicates);
         slots.addAll(duplicateSet);
@@ -232,8 +237,12 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
                 ProxiedPlayer player = Matsu.INSTANCE.getProxy().getPlayer(uuid);
                 if (player != null) {
                     player.sendMessage(new TextComponent(str.replace("{pos}", (pos.get() + 1) + "")));
-                    player.setTabHeader(new TextComponent(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
-                            new TextComponent(queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "")));
+
+                    // Only update the player's tab header if they are still in the queue server, otherwise, only send the chat message
+                    if (player.getServer().getInfo().equals(Matsu.queueServerInfo)) {
+                        player.setTabHeader(new TextComponent(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
+                                new TextComponent(queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "")));
+                    }
                 }
                 pos.getAndIncrement();
             }
@@ -253,11 +262,11 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
                     player.sendMessage(new TextComponent(str.replace("{pos}", (pos.get() + 1) + "")));
                     player.setTabHeader(new TextComponent(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
                             new TextComponent(queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "")));
+                    pos.getAndIncrement();
                 }
-                pos.getAndIncrement();
-            }
-            if (Matsu.CONFIG.perQueuePos) {
-                pos.set(0);
+                if (Matsu.CONFIG.perQueuePos) {
+                    pos.set(0);
+                }
             }
         });
     }

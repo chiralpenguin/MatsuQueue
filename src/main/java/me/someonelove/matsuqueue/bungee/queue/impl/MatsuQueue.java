@@ -5,8 +5,7 @@ import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.util.LinkedList;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 import org.jetbrains.annotations.Nullable;
@@ -32,10 +31,18 @@ public class MatsuQueue implements IMatsuQueue {
 
     @Override
     public void addPlayerToQueue(ProxiedPlayer player) {
+        if (queue.contains(player.getUniqueId())) {
+            if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, String.format("Tried to assign %s to a queue they are already in!", player.getName()));}
+            return;
+        }
+
         queue.add(player.getUniqueId());
         player.sendMessage(new TextComponent(Matsu.CONFIG.serverFullMessage.replace("&", "\247")));
         if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " placed in queue " + this.name);}
+
+        /* TODO Reimplement this feature so that players are made aware of their queue position immediately after logging in. It displays an incorrect position atm.
         Matsu.CONFIG.slotsMap.forEach((name, slot) -> slot.broadcast(Matsu.CONFIG.positionMessage.replace("&", "\247"), player));
+         */
     }
 
     @Override
@@ -57,6 +64,29 @@ public class MatsuQueue implements IMatsuQueue {
         if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO, player.getName() + " transferred to destination server");}
         Matsu.CONFIG.slotsMap.get(slots).occupySlot(player);
         queue.remove(queue.getFirst());
+    }
+
+    @Override
+    public HashSet<UUID> removeDuplicateUUIDs() {
+        HashSet<UUID> duplicates = new HashSet<>();
+        HashSet<UUID> IDset = new HashSet<>();
+
+        Iterator<UUID> it = getQueue().iterator();
+        int i = 0;
+        while (it.hasNext()) {
+            UUID id = it.next();
+            if (!IDset.contains(id)) {
+                IDset.add(id);
+            }
+            else {
+                duplicates.add(id);
+                getQueue().remove(i);
+            }
+
+            i ++;
+        }
+
+        return duplicates;
     }
 
     @Override

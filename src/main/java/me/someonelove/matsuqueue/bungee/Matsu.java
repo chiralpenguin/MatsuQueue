@@ -1,6 +1,6 @@
 package me.someonelove.matsuqueue.bungee;
 
-import me.someonelove.matsuqueue.bungee.queue.impl.MatsuSlotCluster;
+import me.someonelove.matsuqueue.bungee.queue.IMatsuSlotCluster;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.md_5.bungee.api.CommandSender;
@@ -13,22 +13,15 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
-
-import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
 
 
 public final class Matsu extends Plugin {
 
     public static ConfigurationFile CONFIG;
-    public ConfigurationFile NEWCONFIG;
     public static Matsu INSTANCE;
-    public static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
-
     /**
      * Used to (hopefully) make the process of choosing a server on-join faster.
      */
@@ -39,8 +32,6 @@ public final class Matsu extends Plugin {
 
     public static boolean queueServerOk = true;
     public static boolean destinationServerOk = true;
-    @SuppressWarnings("unused")
-	private static boolean isLuckPermsOk = false;
 
     public ScheduledTask UpdateQueueTask = null;
     
@@ -62,9 +53,12 @@ public final class Matsu extends Plugin {
         } else {
             getLogger().log(Level.INFO, "Currently using BungeeCord permissions system - switch to LuckPerms in config.");
         }
-        
+
+        // TODO Need to move these to their own class and register with constructors
         this.getProxy().getPluginManager().registerCommand(INSTANCE, new UpdateSlotsCommand());
         this.getProxy().getPluginManager().registerCommand(INSTANCE, new DebugQueuesCommand());
+        this.getProxy().getPluginManager().registerCommand(INSTANCE, new LeaveQueueCommand());
+        this.getProxy().getPluginManager().registerCommand(INSTANCE, new JoinQueueCommand());
         
         this.getProxy().getPluginManager().registerListener(this, new EventReactions());
         
@@ -88,12 +82,15 @@ public final class Matsu extends Plugin {
                 }
             }
             removalList.forEach(cluster::onPlayerLeave);
+
+            /* Duplicate checking may be unneeded now that slots cannot accept a player more than once
             HashSet<UUID> duplicates = cluster.removeDuplicateSlots();
-            if (duplicates.size() != 0) {
+            if (duplicates.size() > 0) {
                 for (UUID duplicate : duplicates) {
                     if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Player %s was using multiple slots!", this.getProxy().getPlayer(duplicate).getName()));}
                 }
             }
+             */
         });
     }
     
@@ -103,7 +100,7 @@ public final class Matsu extends Plugin {
     		cluster.getAssociatedQueues().forEach((name, queue) -> {
     			for (UUID id : queue.getQueue()) {
     				ProxiedPlayer player = this.getProxy().getPlayer(id);
-    				if (player == null || !player.isConnected() || !player.getServer().getInfo().getName().equals(queueServerInfo.getName())) {
+    				if (player == null || !player.isConnected() || player.getServer().getInfo().equals(destinationServerInfo)) {
     					removalList.add(id);
     					if (player != null) {
     						if (CONFIG.verbose) {getLogger().log(Level.INFO, "Purging Player: " + player.getName() + player.getServer().getInfo().getName() + player.getServer().getInfo().getName().equals(queueServerInfo.getName()));}
@@ -111,6 +108,15 @@ public final class Matsu extends Plugin {
     				}
     			}
     			removalList.forEach(queue::removePlayerFromQueue);
+
+                /* Duplicate checking may be unneeded now that queues cannot accept a player more than once
+    			HashSet<UUID> duplicates = queue.removeDuplicateUUIDs();
+    			if (duplicates.size() > 0) {
+                    for (UUID duplicate : duplicates) {
+                        if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Player %s was assigned to multiple queue spaces!", this.getProxy().getPlayer(duplicate).getName()));}
+                    }
+                }
+    			 */
     		});
     	});
     }
@@ -121,13 +127,11 @@ public final class Matsu extends Plugin {
 			purgeSlots();
             purgeQueues();
 
-            /* TODO Test and implement this feature, may cause issues but was intended to fix players stil in queue after restarts
             Matsu.CONFIG.slotsMap.forEach((str, cluster) -> {
                 while (!cluster.needsQueueing()) {
                     cluster.connectHighestPriorityPlayer();
                 }
             });
-            */
 
             queueServerOk = isServerUp(queueServerInfo);
             if (!queueServerOk) {
@@ -136,6 +140,7 @@ public final class Matsu extends Plugin {
                 }
                 return;
             }
+
             destinationServerOk = isServerUp(destinationServerInfo);
             if (!destinationServerOk) {
                 for (ProxiedPlayer player : getProxy().getPlayers()) {
@@ -143,6 +148,7 @@ public final class Matsu extends Plugin {
                 }
                 return;
             }
+
             CONFIG.slotsMap.forEach((name, slot) -> slot.broadcast(CONFIG.positionMessage.replace("&", "\247")));
             if (CONFIG.verbose) {getLogger().log(Level.INFO,"Purged queues and updated position messages.");}
 		}
@@ -151,7 +157,7 @@ public final class Matsu extends Plugin {
     
     public class UpdateSlotsCommand extends Command {
     	public UpdateSlotsCommand() {
-    		super("updateslots", "matsuqueue.updateslots");
+    		super("updateslots", "queue.updateslots");
     	}
 
     	@SuppressWarnings("static-access")
@@ -163,8 +169,8 @@ public final class Matsu extends Plugin {
     		}
             INSTANCE.getProxy().getScheduler().cancel(UpdateQueueTask);
 
-            INSTANCE.NEWCONFIG = new ConfigurationFile();
-            INSTANCE.NEWCONFIG.slotsMap.forEach((str, cluster)-> {
+            ConfigurationFile newConfig = new ConfigurationFile();
+            newConfig.slotsMap.forEach((str, cluster)-> {
                 int oldSlots = CONFIG.slotsMap.get(cluster.getSlotName()).getTotalSlots(true);
                 int newSlots = cluster.getTotalSlots(true);
                 int change = newSlots - oldSlots;
@@ -190,7 +196,7 @@ public final class Matsu extends Plugin {
 
     public class DebugQueuesCommand extends Command {
         public DebugQueuesCommand() {
-            super("queuedebug", "matsuqueue.debug");
+            super("queuedebug", "queue.debug");
         }
 
         @Override
@@ -200,13 +206,13 @@ public final class Matsu extends Plugin {
                 return;
             }
 
-            CONFIG.slotsMap.forEach((slotname, cluster) -> {
+            CONFIG.slotsMap.forEach((slotName, cluster) -> {
                 INSTANCE.getLogger().log(Level.INFO, String.format("Slot: %s (%s)", cluster.getSlotName(), cluster.getSlots().size()));
                 for(UUID slot : cluster.getSlots()) {
                     INSTANCE.getLogger().log(Level.INFO,String.format("- %s", INSTANCE.getProxy().getPlayer(slot)));
                 }
 
-                cluster.getAssociatedQueues().forEach((queuename, queue) -> {
+                cluster.getAssociatedQueues().forEach((queueName, queue) -> {
                     INSTANCE.getLogger().log(Level.INFO, String.format("Queue: %s (%s)", queue.getName(), queue.getQueue().size()));
                     for (UUID player : queue.getQueue()) {
                         INSTANCE.getLogger().log(Level.INFO, String.format("- %s", INSTANCE.getProxy().getPlayer(player)));
@@ -217,6 +223,103 @@ public final class Matsu extends Plugin {
             });
         }
 
+    }
+
+    public class LeaveQueueCommand extends Command {
+        public LeaveQueueCommand() {
+            super("queueleave", "queue.leavequeue");
+        }
+
+        @Override
+        public void execute(CommandSender sender, String[] args) {
+            if (!(sender instanceof ProxiedPlayer)) {
+                getLogger().log(Level.INFO, "Only a player may use this command");
+                return;
+            }
+
+            ProxiedPlayer player = (ProxiedPlayer) sender;
+            AtomicBoolean success = new AtomicBoolean(false);
+
+
+            CONFIG.slotsMap.forEach((slotName, cluster) ->{
+                cluster.getAssociatedQueues().forEach((queueName, queue) -> {
+                    if (queue.getQueue().contains(player.getUniqueId())) {
+                        queue.removePlayerFromQueue(player);
+                        player.sendMessage(new TextComponent(CONFIG.leaveMessage.replace("&", "\247")));
+                        if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Player %s left queue %s", player.getName(), queueName));}
+                        success.set(true);
+                    }
+                });
+            });
+
+            if (!success.get()) {
+                player.sendMessage(new TextComponent(CONFIG.leaveErrorMessage.replace("&", "\247")));
+            }
+        }
+    }
+
+    public class JoinQueueCommand extends Command {
+        public JoinQueueCommand() {
+            super("queuejoin", "queue.joinqueue");
+        }
+
+        @Override
+        public void execute(CommandSender sender, String[] args) {
+            if (!(sender instanceof ProxiedPlayer)) {
+                getLogger().log(Level.INFO, "Only a player may use this command");
+                return;
+            }
+
+            ProxiedPlayer player = (ProxiedPlayer) sender;
+            AtomicBoolean error = new AtomicBoolean(false);
+
+            CONFIG.slotsMap.forEach((slotName, cluster) ->{
+                if (cluster.getSlots().contains(player.getUniqueId())) {
+                    error.set(true);
+                    if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Player %s is already in slot %s!", player.getName(), slotName));}
+                    return;
+                }
+
+                cluster.getAssociatedQueues().forEach((queueName, queue) -> {
+                    if (queue.getQueue().contains(player.getUniqueId())) {
+                        if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Player %s is already in queue %s!", player.getName(), queueName));}
+                        error.set(true);
+                    }
+                });
+            });
+
+            if (error.get()) {
+                player.sendMessage(new TextComponent(CONFIG.joinErrorMessage.replace("&", "\247")));
+                return;
+            }
+
+            player.sendMessage(new TextComponent(CONFIG.joinMessage.replace("&", "\247")));
+            IMatsuSlotCluster slot = null;
+
+            for (String permission : player.getPermissions()) {
+                if (!permission.matches("matsuqueue\\..*\\..*")) continue;
+                String[] broken = permission.split("\\.");
+                if (broken.length != 3) continue;
+                String cache = broken[0] + "." + broken[1] + ".";
+                slot = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get(cache));
+                if (slot == null) {
+                    System.err.println(permission + " returns a null slot tier");
+                }
+            }
+
+            if (slot == null) {
+                slot = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get("matsuqueue.default."));
+            }
+
+            if (!slot.needsQueueing()) {
+                player.connect(destinationServerInfo);
+            }
+            else if (!player.getServer().getInfo().equals(queueServerInfo)){
+                player.connect(queueServerInfo);
+            }
+
+            slot.queuePlayer(player);
+        }
     }
 
     @Override

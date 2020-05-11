@@ -3,15 +3,21 @@
 # https://github.com/nitricspace/MatsuQueue | https://discordapp.com/invite/tvYWcZt
 
 # Plugin configuration guide: https://github.com/nitricspace/MatsuQueue/wiki/Configuration-File
-serverFullMessage: '&6Server is full'
-connectingMessage: '&6Connecting to the server...'
-positionMessage: '&6Your position in queue is &l{pos}'
 queueServerKey: queue
 destinationServerKey: main
 useLuckPerms: false
 bypassPermission: matsuqueue.skip
 perQueuePosition: true
 verbose: false
+
+# Messages
+serverFullMessage: '&6Server is full'
+connectingMessage: '&6Connecting to the server...'
+positionMessage: '&6Your position in queue is &l{pos}'
+queueLeaveMessage: '&6You have left the queue. Do &5/queuejoin&6 to rejoin.'
+queueLeaveErrorMessage: '&6You are not in the queue! Do &5/queuejoin&6 to join.'
+queueJoinMessage: '&6You have rejoined the queue. Do &5/queueleave &6to leave.'
+queueJoinErrorMessage: '&6You are already in the queue or destination server! Do &5/queueleave &6to leave.'
 
 # Server Slots https://github.com/nitricspace/MatsuQueue/wiki/Slots-and-Queues
 slots:

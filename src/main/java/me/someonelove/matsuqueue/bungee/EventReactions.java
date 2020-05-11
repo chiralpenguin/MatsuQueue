@@ -6,11 +6,7 @@ import net.md_5.bungee.api.ReconnectHandler;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
-import net.md_5.bungee.api.event.ServerConnectedEvent;
-import net.md_5.bungee.api.event.ServerSwitchEvent;
+import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -120,25 +116,17 @@ public class EventReactions implements Listener {
         IMatsuSlotCluster slots = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get("matsuqueue.default."));
         slots.queuePlayer(p);
     }
-    
+
+
     @EventHandler
     public void onServerChange(ServerSwitchEvent e) {
-    	if (e.getFrom() != null ) {
-    		if (e.getFrom().getName().equals(Matsu.CONFIG.destinationServerKey)) {
+    	if (e.getFrom() != null) {
+    		if (e.getFrom().equals(Matsu.destinationServerInfo)) {
         		Matsu.CONFIG.slotsMap.forEach((name, slot) -> {
                     slot.onPlayerLeave(e.getPlayer());
                     if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Removed player: %s from slot: %s", e.getPlayer().getName(), slot.getSlotName()));}
+                    return;
                 });
-        	}
-        	else if (e.getFrom().getName().equals(Matsu.CONFIG.queueServerKey) && !e.getPlayer().getServer().getInfo().getName().equals(Matsu.CONFIG.destinationServerKey)) {
-        		Matsu.CONFIG.slotsMap.forEach((str, cluster) -> {
-            		cluster.getAssociatedQueues().forEach((name, queue) -> {
-            			if (queue.getQueue().contains(e.getPlayer().getUniqueId())) {
-            				queue.removePlayerFromQueue(e.getPlayer());
-            				if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().log(Level.INFO,String.format("Removed player: %s from queue: %s", e.getPlayer().getName(), queue.getName()));}
-            			}
-            		});
-            	});
         	}
     	}
     }

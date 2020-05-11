@@ -2,7 +2,9 @@ package me.someonelove.matsuqueue.bungee.queue;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -17,6 +19,8 @@ public interface IMatsuQueue {
     void removePlayerFromQueue(UUID player);
 
     void connectFirstPlayerToDestinationServer();
+
+    HashSet<UUID> removeDuplicateUUIDs();
 
     String getName();
 
