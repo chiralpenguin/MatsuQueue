@@ -127,12 +127,6 @@ public final class Matsu extends Plugin {
 			purgeSlots();
             purgeQueues();
 
-            Matsu.CONFIG.slotsMap.forEach((str, cluster) -> {
-                while (!cluster.needsQueueing()) {
-                    cluster.connectHighestPriorityPlayer();
-                }
-            });
-
             queueServerOk = isServerUp(queueServerInfo);
             if (!queueServerOk) {
                 for (ProxiedPlayer player : getProxy().getPlayers()) {
@@ -148,6 +142,14 @@ public final class Matsu extends Plugin {
                 }
                 return;
             }
+
+            /* TODO Test and implement as part of the destination server restart handling
+            Matsu.CONFIG.slotsMap.forEach((str, cluster) -> {
+                while (!cluster.needsQueueing()) {
+                    cluster.connectHighestPriorityPlayer();
+                }
+            });
+             */
 
             CONFIG.slotsMap.forEach((name, slot) -> slot.broadcast(CONFIG.positionMessage.replace("&", "\247")));
             if (CONFIG.verbose) {getLogger().log(Level.INFO,"Purged queues and updated position messages.");}
