@@ -275,4 +275,25 @@ public class MatsuSlotCluster implements IMatsuSlotCluster, Listener {
     public List<UUID> getSlots() {
         return slots;
     }
+
+    public static IMatsuSlotCluster getSlotFromPlayer(ProxiedPlayer player) {
+        IMatsuSlotCluster slot = null;
+
+        for (String permission : player.getPermissions()) {
+            if (!permission.matches("matsuqueue\\..*\\..*")) continue;
+            String[] broken = permission.split("\\.");
+            if (broken.length != 3) continue;
+            String cache = broken[0] + "." + broken[1] + ".";
+            slot = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get(cache));
+            if (slot == null) {
+                System.err.println(permission + " returns a null slot tier");
+            }
+        }
+
+        if (slot == null) {
+            slot = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get("matsuqueue.default."));
+        }
+
+        return slot;
+    }
 }

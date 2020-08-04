@@ -1,6 +1,7 @@
 package me.someonelove.matsuqueue.bungee;
 
 import me.someonelove.matsuqueue.bungee.queue.IMatsuSlotCluster;
+import me.someonelove.matsuqueue.bungee.queue.impl.MatsuSlotCluster;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.md_5.bungee.api.CommandSender;
@@ -82,15 +83,6 @@ public final class Matsu extends Plugin {
                 }
             }
             removalList.forEach(cluster::onPlayerLeave);
-
-            /* Duplicate checking may be unneeded now that slots cannot accept a player more than once
-            HashSet<UUID> duplicates = cluster.removeDuplicateSlots();
-            if (duplicates.size() > 0) {
-                for (UUID duplicate : duplicates) {
-                    if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Player %s was using multiple slots!", this.getProxy().getPlayer(duplicate).getName()));}
-                }
-            }
-             */
         });
     }
     
@@ -108,15 +100,6 @@ public final class Matsu extends Plugin {
     				}
     			}
     			removalList.forEach(queue::removePlayerFromQueue);
-
-                /* Duplicate checking may be unneeded now that queues cannot accept a player more than once
-    			HashSet<UUID> duplicates = queue.removeDuplicateUUIDs();
-    			if (duplicates.size() > 0) {
-                    for (UUID duplicate : duplicates) {
-                        if (CONFIG.verbose) {getLogger().log(Level.INFO, String.format("Player %s was assigned to multiple queue spaces!", this.getProxy().getPlayer(duplicate).getName()));}
-                    }
-                }
-    			 */
     		});
     	});
     }
@@ -296,22 +279,7 @@ public final class Matsu extends Plugin {
             }
 
             player.sendMessage(new TextComponent(CONFIG.joinMessage.replace("&", "\247")));
-            IMatsuSlotCluster slot = null;
-
-            for (String permission : player.getPermissions()) {
-                if (!permission.matches("matsuqueue\\..*\\..*")) continue;
-                String[] broken = permission.split("\\.");
-                if (broken.length != 3) continue;
-                String cache = broken[0] + "." + broken[1] + ".";
-                slot = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get(cache));
-                if (slot == null) {
-                    System.err.println(permission + " returns a null slot tier");
-                }
-            }
-
-            if (slot == null) {
-                slot = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get("matsuqueue.default."));
-            }
+            IMatsuSlotCluster slot = MatsuSlotCluster.getSlotFromPlayer(player);
 
             if (!slot.needsQueueing()) {
                 player.connect(destinationServerInfo);

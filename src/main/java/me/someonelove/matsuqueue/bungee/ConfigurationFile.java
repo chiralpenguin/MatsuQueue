@@ -1,6 +1,5 @@
 package me.someonelove.matsuqueue.bungee;
 
-import com.sun.corba.se.impl.protocol.INSServerRequestDispatcher;
 import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
 import me.someonelove.matsuqueue.bungee.queue.IMatsuSlotCluster;
 import me.someonelove.matsuqueue.bungee.queue.impl.MatsuQueue;

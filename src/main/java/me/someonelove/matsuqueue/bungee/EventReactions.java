@@ -1,6 +1,7 @@
 package me.someonelove.matsuqueue.bungee;
 
 import me.someonelove.matsuqueue.bungee.queue.IMatsuSlotCluster;
+import me.someonelove.matsuqueue.bungee.queue.impl.MatsuSlotCluster;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.ReconnectHandler;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -32,28 +33,12 @@ public class EventReactions implements Listener {
         ProxyServer.getInstance().setReconnectHandler(new ReconnectHandler() {
             @Override
             public ServerInfo getServer(ProxiedPlayer player) {
-                for (String permission : player.getPermissions()) {
-                    if (!permission.matches("matsuqueue\\..*\\..*")) continue;
-                    String[] broken = permission.split("\\.");
-                    if (broken.length != 3) continue;
-                    String cache = broken[0] + "." + broken[1] + ".";
-                    IMatsuSlotCluster slot = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get(cache));
-                    if (slot == null) {
-                        System.err.println(permission + " returns a null slot tier");
-                        continue;
-                    }
-                    if (slot.needsQueueing()) {
-                        return Matsu.queueServerInfo;
-                    } else {
-                        return Matsu.destinationServerInfo;
-                    }
-                }
-                IMatsuSlotCluster slots = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get("matsuqueue.default."));
-                if (slots == null) {
+                IMatsuSlotCluster slot = MatsuSlotCluster.getSlotFromPlayer(player);
+                if (slot == null) {
                     player.disconnect(new TextComponent("\2476No valid queue server to connect to ;-;"));
                     return null;
                 }
-                if (slots.needsQueueing()) {
+                if (slot.needsQueueing()) {
                     return Matsu.queueServerInfo;
                 } else {
                     return Matsu.destinationServerInfo;
@@ -99,22 +84,8 @@ public class EventReactions implements Listener {
     public void onProxyJoin(ServerConnectedEvent e) {
         if (!toDo.contains(e.getPlayer().getUniqueId())) return;
         toDo.remove(e.getPlayer().getUniqueId());
-        ProxiedPlayer p = e.getPlayer();
-        for (String permission : p.getPermissions()) {
-            if (!permission.matches("matsuqueue\\..*\\..*")) continue;
-            String[] broken = permission.split("\\.");
-            if (broken.length != 3) continue;
-            String cache = broken[0] + "." + broken[1] + ".";
-            IMatsuSlotCluster slot = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get(cache));
-            if (slot == null) {
-                System.err.println(permission + " returns a null slot tier");
-                continue;
-            }
-            slot.queuePlayer(p);
-            return;
-        }
-        IMatsuSlotCluster slots = Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get("matsuqueue.default."));
-        slots.queuePlayer(p);
+        IMatsuSlotCluster slot = MatsuSlotCluster.getSlotFromPlayer(e.getPlayer());
+        slot.queuePlayer(e.getPlayer());
     }
 
 
