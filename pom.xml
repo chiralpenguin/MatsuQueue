@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>me.somebodylove</groupId>
   <artifactId>MatsuQueue</artifactId>
-  <version>1.6</version>
+  <version>1.7</version>
 
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,7 +40,7 @@
 	 <dependency>
   		<groupId>net.md-5</groupId>
   		<artifactId>bungeecord-api</artifactId>
-  		<version>1.15-SNAPSHOT</version>
+  		<version>1.16-R0.2-SNAPSHOT</version>
   	</dependency>
   	  
     <dependency>
@@ -52,7 +52,7 @@
   	<dependency>
   		<groupId>net.luckperms</groupId>
   		<artifactId>api</artifactId>
-  		<version>5.0</version>
+  		<version>5.1</version>
   	</dependency>
    </dependencies>
 </project>
