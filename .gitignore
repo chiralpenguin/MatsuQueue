@@ -1,0 +1,14 @@
+#.gitignore
+
+bin/
+build/
+target/
+
+# Ignore Eclipse IDE files
+.classpath
+.project
+.settings/
+
+# Ignore IntelliJ IDE files
+MatsuQueue.iml
+.idea/

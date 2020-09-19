@@ -1,0 +1,60 @@
+# MatsuQueue - By EmotionalLove, updated by nitricspace
+# A queue plugin for controlling the player count of survival servers (or any type of server, for that matter).
+# https://github.com/nitricspace/MatsuQueue | https://discordapp.com/invite/tvYWcZt
+
+# Plugin configuration guide: https://github.com/nitricspace/MatsuQueue/wiki/Configuration-File
+queueServerKey: queue
+destinationServerKey: main
+useLuckPerms: false
+bypassPermission: matsuqueue.skip
+perQueuePosition: true
+verbose: false
+
+# Messages
+serverFullMessage: '&6Server is full'
+connectingMessage: '&6Connecting to the server...'
+positionMessage: '&6Your position in queue is &l{pos}'
+queueLeaveMessage: '&6You have left the queue. Do &5/queuejoin&6 to rejoin.'
+queueLeaveErrorMessage: '&6You are not in the queue! Do &5/queuejoin&6 to join.'
+queueJoinMessage: '&6You have rejoined the queue. Do &5/queueleave &6to leave.'
+queueJoinErrorMessage: '&6You are already in the queue or destination server! Do &5/queueleave &6to leave.'
+
+# Server Slots https://github.com/nitricspace/MatsuQueue/wiki/Slots-and-Queues
+slots:
+  standard:
+    capacity: 100
+    permission: default
+  reserved:
+    capacity: 20
+    permission: reserved
+
+# Slot Queues
+queues:
+  standard:
+    priority: 2
+    slots: standard
+    permission: default
+    tabHeader: '\n&dMatsuQueue\n\n&6Server is full\n&6Position in queue: &l{pos}\n'
+    tabFooter: \n&6You can donate at (Donation Link) for priority queue, or for a
+      reserved slot.\n
+  priority:
+    priority: 1
+    slots: standard
+    permission: priority
+    tabHeader: '\n&dMatsuQueue\n\n&6Server is full\n&6Position in queue: &l{pos}\n'
+    tabFooter: \n&6Thank you for donating for priority queue!\n
+  reserved:
+    priority: 1
+    slots: reserved
+    permission: reserved
+    tabHeader: '\n&dMatsuQueue\n\n&6Server is full\n&6Position in queue: &l{pos}\n'
+    tabFooter: \n&6Thank yo ufor donating for a reserved slot!\n
+
+# Slot & Queue lists
+queuenames:
+- standard
+- priority
+- reserved
+slotnames:
+- standard
+- reserved
