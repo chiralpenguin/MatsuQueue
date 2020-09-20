@@ -1,9 +1,9 @@
-package me.someonelove.matsuqueue.bungee.queue.impl;
+package me.someonelove.matsuqueue.queue.impl;
 
 import com.velocitypowered.api.proxy.Player;
-import me.someonelove.matsuqueue.bungee.Matsu;
-import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
-import me.someonelove.matsuqueue.bungee.queue.IMatsuSlotCluster;
+import me.someonelove.matsuqueue.Matsu;
+import me.someonelove.matsuqueue.queue.IMatsuQueue;
+import me.someonelove.matsuqueue.queue.IMatsuSlotCluster;
 import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -15,7 +15,6 @@ import net.luckperms.api.query.QueryOptions;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class MatsuSlotCluster implements IMatsuSlotCluster {
@@ -55,7 +54,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
     public void queuePlayer(Player player) {
         if (player.hasPermission(Matsu.CONFIG.bypassPermission)) {
             player.sendMessage(TextComponent.of(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
-            player.createConnectionRequest(Matsu.destinationServerInfo);
+            player.createConnectionRequest(Matsu.destinationServerInfo).connect();
             if (Matsu.CONFIG.verbose) {
                 Matsu.INSTANCE.getLogger().info(player.getUsername() + " bypassed the queue");
             }
@@ -97,6 +96,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
                 }
             }
             topQueue.addPlayerToQueue(player);
+            broadcast(Matsu.CONFIG.positionMessage, player);
             return;
         }
 
@@ -215,7 +215,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
                     player.sendMessage(TextComponent.of(str.replace("{pos}", (pos.get() + 1) + "")));
 
                     // Only update the player's tab header if they are still in the queue server, otherwise, only send the chat message
-                    if (player.getCurrentServer().get().equals(Matsu.queueServerInfo)) {
+                    if (player.getCurrentServer().get().getServer().equals(Matsu.queueServerInfo)) {
                         player.getTabList().setHeaderAndFooter(TextComponent.of(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
                                 TextComponent.of(queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "")));
                     }
@@ -235,15 +235,15 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
         associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).forEach(queue -> {
             for (UUID uuid : queue.getQueue()) {
                 Player player = Matsu.INSTANCE.getProxy().getPlayer(uuid).get();
-                if (player != null && player == targetPlayer) {
+                if (player.equals(targetPlayer)) {
                     player.sendMessage(TextComponent.of(str.replace("{pos}", (pos.get() + 1) + "")));
                     player.getTabList().setHeaderAndFooter(TextComponent.of(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
                             TextComponent.of(queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "")));
-                    pos.getAndIncrement();
                 }
-                if (Matsu.CONFIG.perQueuePos) {
-                    pos.set(0);
-                }
+                pos.getAndIncrement();
+            }
+            if (Matsu.CONFIG.perQueuePos) {
+                pos.set(0);
             }
         });
     }

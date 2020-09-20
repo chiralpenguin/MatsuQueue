@@ -1,4 +1,4 @@
-package me.someonelove.matsuqueue.bungee.queue;
+package me.someonelove.matsuqueue.queue;
 
 import com.velocitypowered.api.proxy.Player;
 

@@ -1,6 +1,0 @@
-name: MatsuQueue
-version: 1.7
-softDepends: [LuckPerms]
-main: me.someonelove.matsuqueue.bungee.Matsu
-description: Fork of MastuQueue adapted for Purity Vanilla
-author: Sasha, updated by nitricspace
