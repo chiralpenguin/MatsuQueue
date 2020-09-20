@@ -1,19 +1,18 @@
-package me.someonelove.matsuqueue.bungee;
+package me.someonelove.matsuqueue;
 
-import com.mojang.brigadier.tree.CommandNode;
 import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
-import me.someonelove.matsuqueue.bungee.queue.IMatsuSlotCluster;
-import me.someonelove.matsuqueue.bungee.queue.impl.MatsuSlotCluster;
+import me.someonelove.matsuqueue.queue.IMatsuSlotCluster;
+import me.someonelove.matsuqueue.queue.impl.MatsuSlotCluster;
 import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -23,20 +22,17 @@ import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 
-@Plugin(id = "MatsuQueue", name = "MatsuQueue", version = "1.0",
+@Plugin(id = "matsuqueue", name = "MatsuQueue", version = "1.0",
         description = "Fork of MastuQueue adapted for Purity Vanilla",
-        authors = "Sasha, updated by nitricspace")
+        authors = "Sasha, updated by nitricspace",
+        dependencies = {@Dependency(id = "luckperms", optional = false)})
 public class Matsu {
     private final ProxyServer server;
     private final Logger logger;
 
     public static ConfigurationFile CONFIG;
     public static Matsu INSTANCE;
-    /**
-     * Used to (hopefully) make the process of choosing a server on-join faster.
-     */
     public static LinkedHashMap<String, String> slotPermissionCache = new LinkedHashMap<>();
     public static LinkedHashMap<String, String> queuePermissionCache = new LinkedHashMap<>();
     public static RegisteredServer destinationServerInfo;
@@ -57,7 +53,6 @@ public class Matsu {
         CONFIG = new ConfigurationFile();
         try {
             if (CONFIG.verbose) {getLogger().info("Attempting to open API connection to LuckPerms");}
-            @SuppressWarnings("unused")
             LuckPerms api = LuckPermsProvider.get();
             getLogger().info("LuckPerms API connection successfully established!");
         } catch (Exception e) {
@@ -68,6 +63,8 @@ public class Matsu {
     @Subscribe
     public void onProxyInitialisation(ProxyInitializeEvent e) {
         slotPermissionCache.clear();
+
+        CONFIG = new ConfigurationFile();
 
         // TODO Need to move these to their own class and register with constructors
         CommandManager manager = getProxy().getCommandManager();
@@ -209,13 +206,13 @@ public class Matsu {
             CONFIG.slotsMap.forEach((slotName, cluster) -> {
                 INSTANCE.getLogger().info(String.format("Slot: %s (%s)", cluster.getSlotName(), cluster.getSlots().size()));
                 for(UUID slot : cluster.getSlots()) {
-                    INSTANCE.getLogger().info(String.format("- %s", INSTANCE.getProxy().getPlayer(slot)));
+                    INSTANCE.getLogger().info(String.format("- %s", INSTANCE.getProxy().getPlayer(slot).get().getUsername()));
                 }
 
                 cluster.getAssociatedQueues().forEach((queueName, queue) -> {
                     INSTANCE.getLogger().info(String.format("Queue: %s (%s)", queue.getName(), queue.getQueue().size()));
                     for (UUID player : queue.getQueue()) {
-                        INSTANCE.getLogger().info(String.format("- %s", INSTANCE.getProxy().getPlayer(player)));
+                        INSTANCE.getLogger().info(String.format("- %s", INSTANCE.getProxy().getPlayer(player).get().getUsername()));
                     }
                     INSTANCE.getLogger().info("\n");
                 });
@@ -294,10 +291,10 @@ public class Matsu {
             IMatsuSlotCluster slot = MatsuSlotCluster.getSlotFromPlayer(player);
 
             if (!slot.needsQueueing()) {
-                player.createConnectionRequest(destinationServerInfo);
+                player.createConnectionRequest(destinationServerInfo).connect();
             }
             else if (!player.getCurrentServer().get().getServer().equals(queueServerInfo)) {
-                player.createConnectionRequest(queueServerInfo);
+                player.createConnectionRequest(queueServerInfo).connect();
             }
 
             slot.queuePlayer(player);
@@ -313,10 +310,14 @@ public class Matsu {
     }
 
     public static boolean isServerUp(RegisteredServer server) {
+        return true;
+
+        /*
         AtomicBoolean serverOnline = new AtomicBoolean(false);
         server.ping().exceptionally(e -> null).thenAcceptAsync(s -> {
             serverOnline.set(true);
         });
         return serverOnline.get();
+         */
     }
 }

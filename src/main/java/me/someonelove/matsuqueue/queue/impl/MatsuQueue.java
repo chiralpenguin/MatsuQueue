@@ -1,11 +1,10 @@
-package me.someonelove.matsuqueue.bungee.queue.impl;
+package me.someonelove.matsuqueue.queue.impl;
 
 import com.velocitypowered.api.proxy.Player;
-import me.someonelove.matsuqueue.bungee.Matsu;
-import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
+import me.someonelove.matsuqueue.Matsu;
+import me.someonelove.matsuqueue.queue.IMatsuQueue;
 
 import java.util.*;
-import java.util.logging.Level;
 
 import net.kyori.adventure.text.TextComponent;
 import org.jetbrains.annotations.Nullable;

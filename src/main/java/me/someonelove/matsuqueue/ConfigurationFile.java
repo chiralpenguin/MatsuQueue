@@ -1,9 +1,9 @@
-package me.someonelove.matsuqueue.bungee;
+package me.someonelove.matsuqueue;
 
-import me.someonelove.matsuqueue.bungee.queue.IMatsuQueue;
-import me.someonelove.matsuqueue.bungee.queue.IMatsuSlotCluster;
-import me.someonelove.matsuqueue.bungee.queue.impl.MatsuQueue;
-import me.someonelove.matsuqueue.bungee.queue.impl.MatsuSlotCluster;
+import me.someonelove.matsuqueue.queue.IMatsuQueue;
+import me.someonelove.matsuqueue.queue.IMatsuSlotCluster;
+import me.someonelove.matsuqueue.queue.impl.MatsuQueue;
+import me.someonelove.matsuqueue.queue.impl.MatsuSlotCluster;
 import me.someonelove.quickyml.YMLParser;
 
 import java.io.*;
@@ -11,9 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-
-import static java.lang.Thread.currentThread;
 
 /**
  * I'm really sorry but i strongly dislike BungeeCord's YML stuff.
@@ -34,6 +31,7 @@ public class ConfigurationFile {
     public String leaveErrorMessage;
     public String joinMessage;
     public String joinErrorMessage;
+    public String destinationJoinErrorMessage;
     public ConcurrentHashMap<String, IMatsuSlotCluster> slotsMap = new ConcurrentHashMap<>();
 
     public ConfigurationFile() {
@@ -63,6 +61,7 @@ public class ConfigurationFile {
         positionMessage = parser.getString("positionMessage", "&6Your position in queue is &l{pos}");
         leaveMessage = parser.getString("queueLeaveMessage", "&6You have left the queue. Do &5/queuejoin &6to rejoin");
         leaveErrorMessage = parser.getString("queueLeaveErrorMessage", "&6You are not in the queue! Do &5/queuejoin&6 to join.");
+        destinationJoinErrorMessage = parser.getString("destinationJoinErrorMessage", "&cYou cannot connect directly to the destination server. Do &5/queuejoin &cinstead.");
         joinMessage = parser.getString("queueJoinMessage", "&6You have rejoined the queue. Do &5/queueleave &6to leave.");
         joinErrorMessage = parser.getString("queueJoinErrorMessage", "&6You are already in the queue or destination server! Do &5/queueleave &6to leave.");
         final List<String> slots = parser.getStringList("slotnames");
