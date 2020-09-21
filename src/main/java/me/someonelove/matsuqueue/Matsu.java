@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -50,14 +51,6 @@ public class Matsu {
 
         INSTANCE = this;
         logger.info("MatsuQueue is loading.");
-        CONFIG = new ConfigurationFile();
-        try {
-            if (CONFIG.verbose) {getLogger().info("Attempting to open API connection to LuckPerms");}
-            LuckPerms api = LuckPermsProvider.get();
-            getLogger().info("LuckPerms API connection successfully established!");
-        } catch (Exception e) {
-                getLogger().info("Error during loading LuckPerms API - perhaps the plugin isn't installed? - " + e);
-        }
     }
 
     @Subscribe
@@ -65,6 +58,14 @@ public class Matsu {
         slotPermissionCache.clear();
 
         CONFIG = new ConfigurationFile();
+
+        try {
+            if (CONFIG.verbose) {getLogger().info("Attempting to open API connection to LuckPerms");}
+            LuckPerms api = LuckPermsProvider.get();
+            getLogger().info("LuckPerms API connection successfully established!");
+        } catch (Exception luckPermsException) {
+            getLogger().info("Error during loading LuckPerms API - perhaps the plugin isn't installed? - " + e);
+        }
 
         // TODO Need to move these to their own class and register with constructors
         CommandManager manager = getProxy().getCommandManager();
@@ -310,14 +311,14 @@ public class Matsu {
     }
 
     public static boolean isServerUp(RegisteredServer server) {
-        return true;
-
-        /*
         AtomicBoolean serverOnline = new AtomicBoolean(false);
-        server.ping().exceptionally(e -> null).thenAcceptAsync(s -> {
+        try {
+            server.ping().get();
             serverOnline.set(true);
-        });
+        } catch (InterruptedException | ExecutionException e) {
+            if (CONFIG.verbose) {INSTANCE.logger.info("Connection refused by " + server.getServerInfo().getName() + ". Is it offline?");}
+        }
+
         return serverOnline.get();
-         */
     }
 }

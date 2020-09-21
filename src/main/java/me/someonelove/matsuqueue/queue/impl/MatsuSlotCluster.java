@@ -96,7 +96,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
                 }
             }
             topQueue.addPlayerToQueue(player);
-            broadcast(Matsu.CONFIG.positionMessage, player);
+            broadcast(Matsu.CONFIG.positionMessage.replace("&", "\247"), player);
             return;
         }
 
@@ -104,6 +104,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
         for (Map.Entry<String, IMatsuQueue> entry : associatedQueues.entrySet()) {
             if (entry.getValue().getPermission().equals("default")) {
                 entry.getValue().addPlayerToQueue(player);
+                broadcast(Matsu.CONFIG.positionMessage.replace("&", "\247"), player);
             }
         }
     }
