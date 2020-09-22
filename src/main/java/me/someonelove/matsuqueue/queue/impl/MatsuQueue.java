@@ -58,10 +58,10 @@ public class MatsuQueue implements IMatsuQueue {
         if (queue.isEmpty()) return;
         Player player = Matsu.INSTANCE.getProxy().getPlayer(queue.getFirst()).get();
         player.sendMessage(TextComponent.of(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
-        player.createConnectionRequest(Matsu.destinationServerInfo);
-        if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().info(player.getUsername() + " transferred to destination server");}
         Matsu.CONFIG.slotsMap.get(slots).occupySlot(player);
         queue.remove(queue.getFirst());
+        player.createConnectionRequest(Matsu.destinationServerInfo).connect();
+        if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().info(player.getUsername() + " transferred to destination server");}
     }
 
     @Override
