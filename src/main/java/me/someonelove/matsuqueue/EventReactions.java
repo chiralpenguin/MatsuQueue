@@ -66,22 +66,20 @@ public class EventReactions {
 
     @Subscribe
     public void onServerPreConnect(ServerPreConnectEvent e) {
-        if (e.getPlayer().hasPermission(Matsu.CONFIG.bypassPermission)) {
+        if (!e.getPlayer().getCurrentServer().isPresent() || !e.getOriginalServer().equals(Matsu.destinationServerInfo) || e.getPlayer().hasPermission(Matsu.CONFIG.bypassPermission)) {
             return;
         }
 
         AtomicBoolean playerHasSlot = new AtomicBoolean(false);
-        if (e.getOriginalServer().equals(Matsu.destinationServerInfo)) {
-            Matsu.CONFIG.slotsMap.forEach((name, slot) -> {
-                if (slot.getSlots().contains(e.getPlayer().getUniqueId())) {
-                    playerHasSlot.set(true);
-                }
-            });
-
-            if (!playerHasSlot.get()) {
-                e.getPlayer().sendMessage(TextComponent.of(Matsu.CONFIG.destinationJoinErrorMessage.replace("&", "\247")));
-                e.setResult(ServerPreConnectEvent.ServerResult.denied());
+        Matsu.CONFIG.slotsMap.forEach((name, slot) -> {
+            if (slot.getSlots().contains(e.getPlayer().getUniqueId())) {
+                playerHasSlot.set(true);
             }
+        });
+
+        if (!playerHasSlot.get()) {
+            e.getPlayer().sendMessage(TextComponent.of(Matsu.CONFIG.destinationJoinErrorMessage.replace("&", "\247")));
+            e.setResult(ServerPreConnectEvent.ServerResult.denied());
         }
     }
 

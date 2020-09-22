@@ -87,13 +87,10 @@ public class Matsu {
         List<UUID> removalList = new ArrayList<>();
         CONFIG.slotsMap.forEach((str, cluster) -> {
             for (UUID slot : cluster.getSlots()) {
-                // Need to handle NoSuchElementException instead of null check as is always false
-                Player player = this.getProxy().getPlayer(slot).get();
-                if (player == null || !player.isActive() || !player.getCurrentServer().get().getServer().equals(destinationServerInfo)) {
+                Optional<Player> player = this.getProxy().getPlayer(slot);
+                if (!player.isPresent() || !player.get().isActive() || !player.get().getCurrentServer().get().getServer().equals(destinationServerInfo)) {
                     removalList.add(slot);
-                    if (player != null) {
-                    	if (CONFIG.verbose) {getLogger().info("Purging Player: " + player.getUsername() + player.getCurrentServer().get().getServer().getServerInfo().getName() + player.getCurrentServer().get().getServer().equals(destinationServerInfo));}
-                    }
+                    if (CONFIG.verbose) {getLogger().info("Purging Player: " + player.get().getUsername() + player.get().getCurrentServer().get().getServer().getServerInfo().getName() + player.get().getCurrentServer().get().getServer().equals(destinationServerInfo));}
                 }
             }
             removalList.forEach(cluster::onPlayerLeave);
@@ -105,12 +102,10 @@ public class Matsu {
     	CONFIG.slotsMap.forEach((str, cluster) -> {
     		cluster.getAssociatedQueues().forEach((name, queue) -> {
     			for (UUID id : queue.getQueue()) {
-    				Player player = this.getProxy().getPlayer(id).get();
-    				if (player == null || !player.isActive() || player.getCurrentServer().get().getServer().equals(destinationServerInfo)) {
+    				Optional<Player> player = this.getProxy().getPlayer(id);
+    				if (!player.isPresent()|| !player.get().isActive() || player.get().getCurrentServer().get().getServer().equals(destinationServerInfo)) {
     					removalList.add(id);
-    					if (player != null) {
-    						if (CONFIG.verbose) {getLogger().info("Purging Player: " + player.getUsername() + player.getCurrentServer().get().getServer().getServerInfo().getName() + player.getCurrentServer().get().getServer().equals(queueServerInfo));}
-    					}
+                        if (CONFIG.verbose) {getLogger().info("Purging Player: " + player.get().getUsername() + player.get().getCurrentServer().get().getServer().getServerInfo().getName() + player.get().getCurrentServer().get().getServer().equals(queueServerInfo));}
     				}
     			}
     			removalList.forEach(queue::removePlayerFromQueue);
