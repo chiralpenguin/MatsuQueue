@@ -6,7 +6,7 @@ import me.someonelove.matsuqueue.queue.IMatsuQueue;
 
 import java.util.*;
 
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
 public class MatsuQueue implements IMatsuQueue {
@@ -35,7 +35,7 @@ public class MatsuQueue implements IMatsuQueue {
         }
 
         queue.add(player.getUniqueId());
-        player.sendMessage(TextComponent.of(Matsu.CONFIG.serverFullMessage.replace("&", "\247")));
+        player.sendMessage(Component.text(Matsu.CONFIG.serverFullMessage.replace("&", "\247")));
         if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().info(player.getUsername() + " placed in queue " + this.name);}
 
         /* TODO Reimplement this feature so that players are made aware of their queue position immediately after logging in. It displays an incorrect position atm.
@@ -57,7 +57,7 @@ public class MatsuQueue implements IMatsuQueue {
     public void connectFirstPlayerToDestinationServer() {
         if (queue.isEmpty()) return;
         Player player = Matsu.INSTANCE.getProxy().getPlayer(queue.getFirst()).get();
-        player.sendMessage(TextComponent.of(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
+        player.sendMessage(Component.text(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
         Matsu.CONFIG.slotsMap.get(slots).occupySlot(player);
         queue.remove(queue.getFirst());
         player.createConnectionRequest(Matsu.destinationServerInfo).connect();

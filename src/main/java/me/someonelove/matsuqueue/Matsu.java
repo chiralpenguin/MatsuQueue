@@ -13,7 +13,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import me.someonelove.matsuqueue.queue.IMatsuSlotCluster;
 import me.someonelove.matsuqueue.queue.impl.MatsuSlotCluster;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Plugin(id = "matsuqueue", name = "MatsuQueue", version = "1.0",
+@Plugin(id = "matsuqueue", name = "MatsuQueue", version = "1.1",
         description = "Fork of MastuQueue adapted for Purity Vanilla",
         authors = "Sasha, updated by nitricspace",
         dependencies = {@Dependency(id = "luckperms", optional = false)})
@@ -122,7 +122,7 @@ public class Matsu {
             queueServerOk = isServerUp(queueServerInfo);
             if (!queueServerOk) {
                 for (Player player : getProxy().getAllPlayers()) {
-                    player.disconnect(TextComponent.of("\2474The queue server is no longer reachable."));
+                    player.disconnect(Component.text("\2474The queue server is no longer reachable."));
                 }
                 return;
             }
@@ -130,7 +130,7 @@ public class Matsu {
             destinationServerOk = isServerUp(destinationServerInfo);
             if (!destinationServerOk) {
                 for (Player player : getProxy().getAllPlayers()) {
-                    player.disconnect(TextComponent.of("\2474The main server is no longer reachable."));
+                    player.disconnect(Component.text("\2474The main server is no longer reachable."));
                 }
                 return;
             }
@@ -157,7 +157,7 @@ public class Matsu {
 
 
     		if (sender instanceof Player) {
-    			sender.sendMessage(TextComponent.of("You must run this command from console."));
+    			sender.sendMessage(Component.text("You must run this command from console."));
     			return;
     		}
 
@@ -195,7 +195,7 @@ public class Matsu {
             CommandSource sender = invocation.source();
 
             if (sender instanceof Player) {
-                sender.sendMessage(TextComponent.of("You must run this command from console."));
+                sender.sendMessage(Component.text("You must run this command from console."));
                 return;
             }
 
@@ -236,7 +236,7 @@ public class Matsu {
                 cluster.getAssociatedQueues().forEach((queueName, queue) -> {
                     if (queue.getQueue().contains(player.getUniqueId())) {
                         queue.removePlayerFromQueue(player);
-                        player.sendMessage(TextComponent.of(CONFIG.leaveMessage.replace("&", "\247")));
+                        player.sendMessage(Component.text(CONFIG.leaveMessage.replace("&", "\247")));
                         if (CONFIG.verbose) {getLogger().info(String.format("Player %s left queue %s", player.getUsername(), queueName));}
                         success.set(true);
                     }
@@ -244,7 +244,7 @@ public class Matsu {
             });
 
             if (!success.get()) {
-                player.sendMessage(TextComponent.of(CONFIG.leaveErrorMessage.replace("&", "\247")));
+                player.sendMessage(Component.text(CONFIG.leaveErrorMessage.replace("&", "\247")));
             }
         }
     }
@@ -279,11 +279,11 @@ public class Matsu {
             });
 
             if (error.get()) {
-                player.sendMessage(TextComponent.of(CONFIG.joinErrorMessage.replace("&", "\247")));
+                player.sendMessage(Component.text(CONFIG.joinErrorMessage.replace("&", "\247")));
                 return;
             }
 
-            player.sendMessage(TextComponent.of(CONFIG.joinMessage.replace("&", "\247")));
+            player.sendMessage(Component.text(CONFIG.joinMessage.replace("&", "\247")));
             IMatsuSlotCluster slot = MatsuSlotCluster.getSlotFromPlayer(player);
 
             if (!slot.needsQueueing()) {
