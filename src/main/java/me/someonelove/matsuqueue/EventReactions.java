@@ -9,7 +9,7 @@ import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import me.someonelove.matsuqueue.queue.IMatsuSlotCluster;
 import me.someonelove.matsuqueue.queue.impl.MatsuSlotCluster;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,12 +34,12 @@ public class EventReactions {
         IMatsuSlotCluster slot = MatsuSlotCluster.getSlotFromPlayer(player);
 
         if (slot == null) {
-            player.disconnect(TextComponent.of("\2476No valid queue server to connect to ;-;"));
+            player.disconnect(Component.text("\2476No valid queue server to connect to ;-;"));
             return;
         }
 
         if (!Matsu.destinationServerOk || !Matsu.queueServerOk) {
-            player.disconnect(TextComponent.of("\2474The server is unreachable."));
+            player.disconnect(Component.text("\2474The server is unreachable."));
         }
 
         if (slot.needsQueueing() && !e.getPlayer().hasPermission(Matsu.CONFIG.bypassPermission)) {
@@ -78,7 +78,7 @@ public class EventReactions {
         });
 
         if (!playerHasSlot.get()) {
-            e.getPlayer().sendMessage(TextComponent.of(Matsu.CONFIG.destinationJoinErrorMessage.replace("&", "\247")));
+            e.getPlayer().sendMessage(Component.text(Matsu.CONFIG.destinationJoinErrorMessage.replace("&", "\247")));
             e.setResult(ServerPreConnectEvent.ServerResult.denied());
         }
     }
