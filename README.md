@@ -1,5 +1,7 @@
 # MatsuQueue (待つQueue)
-This is a fork of [MatsuQueueBungee](https://github.com/EmotionalLove/MatsuQueueBungee) by [EmotionalLove](https://github.com/EmotionalLove). The plugin has been updated for Bungeecord 1.15 and specifically adapted for use by [Purity Vanilla](https://www.purity-vanilla.xyz/).
+This is a fork of [MatsuQueueBungee](https://github.com/EmotionalLove/MatsuQueueBungee) by [EmotionalLove](https://github.com/EmotionalLove). The plugin has been updated and ported to Velocity 1.16  and specifically adapted for use by [Purity Vanilla](https://www.purityvanilla.com/).
+
+If you want to use the plugin on Bungeecord, there is an outdated version available [here](https://github.com/nitricspace/MatsuQueue/releases/tag/bungee-1.7). Please note that this version is no longer supported and if you want the latest fixes and features, you should consider switching to Velocity. It's very simple as long as you don't rely on too many proxy plugins, and most of the main ones have been ported already! Read more [here](https://velocitypowered.com/wiki/users/what-does-velocity-do-for-me/).
 
 ## About
 Running a single-world survival server with a large player count can be resource intensive. Instead of just reducing the max player limit and letting your players play the "reconnect lottery", why not create a queue to wait in? This plugin allows that and is simple to set up. If the server's full, they'll be  sent to the queue server automatically and will be sent to the destination server once there is a space available.
@@ -16,25 +18,25 @@ The destination server can have multiple "slot types" to assign players to based
 Each slot type can have multiple queues associated with them. Using the above example, the default slot type may have two queues; standard and priority. If a player with the priority queue permission joins the queue for the default slot type, they will skip ahead of all players in the standard queue. All of this is completely customisable within the configuration file, including the priorities, queue names and permission nodes.
 
 #### Support for Multiple Servers
-The Bungeecord network may have other servers running on the network that are unaffected by the queue. When a player moves to one of these servers they are removed from the queue and/or removed from their slot so that another player in the queue can take their place.
+The Velocity network may have other servers running on the network that are unaffected by the queue. When a player moves to one of these servers they are removed from the queue and/or removed from their slot so that another player in the queue can take their place.
 
 #### Change Server Capacity While Running
 The capacity of a slot type can be changed while running, to allow more players to join during peak time or to reduce the playercount if the server is lagging. Simply change the capacity in the configuration file and run "/updateslots" in the console. If the capacity has increased, players will be sent from the queue until the queue is empty or the new capacity is reached. If the capacity has decreased, players will not be sent from the queue server until enough players have left the destination server to meet the new capacity.
 
 ## Setup
-- Ensure you are running the latest version of Bungeecord, available [here](https://ci.md-5.net/job/BungeeCord/).
+- Ensure you are running the latest version of Velocity, available [here](https://velocitypowered.com/downloads/).
 
-- Download the latest JAR file from our [releases](https://github.com/nitricspace/MatsuQueue/releases) and move it to your Bungeecord plugins folder.
+- Download the latest JAR file from our [releases](https://github.com/nitricspace/MatsuQueue/releases) and move it to your Velocity plugins folder.
 
-- Run the Bungeecord instance to generate the config file, then stop it.
+- Run the Velocity instance to generate the config file, then stop it.
 
-- Edit the config file to your needs, ensuring that the names of the servers match with that in your Bungeecord configuration. Use [this](https://github.com/nitricspace/MatsuQueue/wiki/Configuration-File) page for help.
+- Edit the config file to your needs, ensuring that the names of the servers match with that in your Velocity configuration. Use [this](https://github.com/nitricspace/MatsuQueue/wiki/Configuration-File) page for help.
 
 - If needed, install the [MatsuQueueBukkit Companion Plugin](https://github.com/EmotionalLove/MatsuQueueBukkit) on the backend servers for a configurable queue environment.
 
-- Run your Bukkit and Bungeecord servers and ensure your config is working as intended. (You can test by setting the MatsuQueue player limit to 1 or 2 and opening multiple instances of Minecraft.)
+- Run your backend and Velocity servers and ensure your config is working as intended. (You can test by setting the MatsuQueue player limit to 1 or 2 and opening multiple instances of Minecraft.)
 
 ## Issues, Troubleshooting and New Features
 A list of current issues with the plugin and new features can be found [here](https://github.com/nitricspace/MatsuQueue/issues). Please check that your issue is not already listed there before opening a new issue, or requesting a new feature.
 
-If you are opening a new issue to report a problem, please include a logfile from your Bungeecord server with "verbose: true" in the config file and give the timestamp of when the issue occurs (if possible).
+If you are opening a new issue to report a problem, please include a logfile from your Velocity server with "verbose: true" in the config file and give the timestamp of when the issue occurs (if possible).
