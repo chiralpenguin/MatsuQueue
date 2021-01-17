@@ -37,7 +37,7 @@ public interface IMatsuSlotCluster {
 
     HashSet<UUID> removeDuplicateSlots();
 
-    void connectHighestPriorityPlayer();
+    void connectNextPlayer();
 
     ConcurrentHashMap<String, IMatsuQueue> getAssociatedQueues();
 
@@ -50,5 +50,7 @@ public interface IMatsuSlotCluster {
     List<UUID> getSlots();
 
 	String getSlotName();
+
+	void initQueuePool();
 
 }

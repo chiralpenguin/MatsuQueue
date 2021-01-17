@@ -23,6 +23,7 @@ public class ConfigurationFile {
     public String destinationServerKey;
     public String bypassPermission;
     public boolean perQueuePos;
+    public boolean usePriorityWeighting;
     public boolean verbose;
     public String serverFullMessage;
     public String connectingMessage;
@@ -55,6 +56,7 @@ public class ConfigurationFile {
         destinationServerKey = parser.getString("destinationServerKey", "main");
         bypassPermission = parser.getString("bypassPermission");
         perQueuePos = Boolean.parseBoolean(parser.getString("perQueuePosition"));
+        usePriorityWeighting = Boolean.parseBoolean(parser.getString("usePriorityWeighting"));
         verbose = Boolean.parseBoolean(parser.getString("verbose", "false"));
         serverFullMessage = parser.getString("serverFullMessage", "&6Server is full");
         connectingMessage = parser.getString("connectingMessage", "&6Connecting to the server...");
@@ -87,6 +89,12 @@ public class ConfigurationFile {
                     parser.getString("queues." + queue + ".tabFooter", "\\n&6You can donate at https://paypal.me/eatsasha for priority access to the server.\\n"));
             slotsMap.get(slot).associateQueue(q);
             if (this.verbose) {Matsu.INSTANCE.getLogger().info("Discovered valid queue " + queue + " associated to slot type " + slot);}
+
+            if (usePriorityWeighting) {
+                slotsMap.forEach((name, cluster) -> {
+                    cluster.initQueuePool();
+                });
+            }
         }
         Matsu.destinationServerInfo = Matsu.INSTANCE.getProxy().getServer(this.destinationServerKey).get();
         Matsu.queueServerInfo = Matsu.INSTANCE.getProxy().getServer(this.queueServerKey).get();

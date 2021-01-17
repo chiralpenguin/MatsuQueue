@@ -7,6 +7,7 @@ queueServerKey: queue
 destinationServerKey: main
 bypassPermission: matsuqueue.skip
 perQueuePosition: true
+usePriorityWeighting: false # Warning: This is an experimental feature
 verbose: false
 
 # Messages
