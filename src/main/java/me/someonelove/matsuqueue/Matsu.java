@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Plugin(id = "matsuqueue", name = "MatsuQueue", version = "1.1",
+@Plugin(id = "matsuqueue", name = "MatsuQueue", version = "2.1",
         description = "Fork of MastuQueue adapted for Purity Vanilla",
         authors = "Sasha, updated by nitricspace",
         dependencies = {@Dependency(id = "luckperms", optional = false)})
@@ -167,18 +167,18 @@ public class Matsu {
             newConfig.slotsMap.forEach((str, cluster)-> {
                 int oldSlots = CONFIG.slotsMap.get(cluster.getSlotName()).getTotalSlots(true);
                 int newSlots = cluster.getTotalSlots(true);
-                int change = newSlots - oldSlots;
+                int slotsChange = newSlots - oldSlots;
                 if (CONFIG.verbose) {getLogger().info(String.format("Slot Type %s: Old Slots: %d New Slots: %d", cluster.getSlotName(), oldSlots, newSlots));}
                 CONFIG.slotsMap.get(cluster.getSlotName()).setTotalSlots(true, newSlots);
                 if (oldSlots != newSlots) {
-                    if (change > 0) { // If slot capacity has increased
-                        getLogger().info(String.format("Capacity of slot %s increased by %d", CONFIG.slotsMap.get(cluster.getSlotName()).getSlotName(), change));
-                        for (int i=0; i < change && !CONFIG.slotsMap.get(cluster.getSlotName()).needsQueueing(); i++) {
-                            CONFIG.slotsMap.get(cluster.getSlotName()).connectHighestPriorityPlayer();
+                    if (slotsChange > 0) { // If slot capacity has increased
+                        getLogger().info(String.format("Capacity of slot %s increased by %d", CONFIG.slotsMap.get(cluster.getSlotName()).getSlotName(), slotsChange));
+                        for (int i=0; i < slotsChange && !CONFIG.slotsMap.get(cluster.getSlotName()).needsQueueing(); i++) {
+                            CONFIG.slotsMap.get(cluster.getSlotName()).connectNextPlayer();
                             }
                         }
                     else { // If slot capacity has decreased
-                        getLogger().info(String.format("Capacity of slot %s decreased by %d", cluster.getSlotName(), Math.abs(change)));
+                        getLogger().info(String.format("Capacity of slot %s decreased by %d", cluster.getSlotName(), Math.abs(slotsChange)));
                     }
                 }
             });

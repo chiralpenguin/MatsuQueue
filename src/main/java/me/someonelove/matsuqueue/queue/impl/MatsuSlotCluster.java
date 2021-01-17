@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import me.someonelove.matsuqueue.Matsu;
 import me.someonelove.matsuqueue.queue.IMatsuQueue;
 import me.someonelove.matsuqueue.queue.IMatsuSlotCluster;
+import me.someonelove.matsuqueue.queue.IQueuePool;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -24,6 +25,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
     private int max;
     private List<UUID> slots = Collections.synchronizedList(new LinkedList<>());
     private ConcurrentHashMap<String, IMatsuQueue> associatedQueues = new ConcurrentHashMap<>();
+    private IQueuePool queuePool;
     public MatsuSlotCluster(String name, int capacity, String permission) {
         this.name = name;
         this.max = capacity;
@@ -157,7 +159,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
     protected void releaseSlot(UUID player) {
         slots.remove(player);
         if (this.getAvailableSlots() > 0) {
-        	connectHighestPriorityPlayer();
+        	connectNextPlayer();
         }
     }
 
@@ -175,13 +177,25 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
         slots.addAll(duplicateSet);
 
         while (!needsQueueing()) {
-            connectHighestPriorityPlayer();
+            connectNextPlayer();
         }
 
         return duplicateSet;
     }
 
-    public void connectHighestPriorityPlayer() {
+    public void connectNextPlayer() {
+        if (Matsu.CONFIG.usePriorityWeighting) {
+            IMatsuQueue queue = queuePool.getNextQueue();
+            if (queue.getQueue().isEmpty()) {
+                if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().info(this.getSlotName()+ "'s pool has no players waiting in queue!");}
+                return;
+            }
+            if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().info(this.getSlotName()+ "'s pool selected queue: " + queue.getName() + " with weighting: " + queue.getPriority() + "/" + this.queuePool.getCombinedWeight());}
+            queue.connectFirstPlayerToDestinationServer();
+            return;
+        }
+
+        // Original logic: will only send players in the highest priority queue.
         List<IMatsuQueue> sorted = associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).collect(Collectors.toList());
         for (IMatsuQueue iMatsuQueue : sorted) {
             if (iMatsuQueue.getQueue().isEmpty()) continue;
@@ -252,6 +266,11 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
     @Override
     public List<UUID> getSlots() {
         return slots;
+    }
+
+    @Override
+    public void initQueuePool() {
+        this.queuePool = new QueuePool(associatedQueues);
     }
 
     public static IMatsuSlotCluster getSlotFromPlayer(Player player) {
