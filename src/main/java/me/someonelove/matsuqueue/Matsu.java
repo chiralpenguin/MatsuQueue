@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Plugin(id = "matsuqueue", name = "MatsuQueue", version = "2.1",
+@Plugin(id = "matsuqueue", name = "MatsuQueue", version = "3.0",
         description = "Fork of MastuQueue adapted for Purity Vanilla",
         authors = "Sasha, updated by nitricspace",
         dependencies = {@Dependency(id = "luckperms", optional = false)})

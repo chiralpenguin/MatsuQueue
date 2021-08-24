@@ -14,17 +14,26 @@ public class MatsuQueue implements IMatsuQueue {
     public final int priority;
     public final String permission;
     public final String slots;
+    private boolean boostEnabled;
+    private float boostRatio;
+    private String boostPermission;
+
+    private Random generator = new Random();
 
     private String header;
     private String footer;
 
     private LinkedList<UUID> queue = new LinkedList<>();
 
-    public MatsuQueue(String name, int priority, String slots, @Nullable String permission) {
+    public MatsuQueue(String name, int priority, String slots, @Nullable String permission, boolean boostEnabled, float boostRatio, String boostPermission) {
         this.name = name;
         this.priority = priority;
         this.permission = permission;
         this.slots = slots;
+
+        this.boostEnabled = boostEnabled;
+        this.boostRatio = boostRatio;
+        this.boostPermission = boostPermission;
     }
 
     @Override
@@ -56,10 +65,26 @@ public class MatsuQueue implements IMatsuQueue {
     @Override
     public void connectFirstPlayerToDestinationServer() {
         if (queue.isEmpty()) return;
+
         Player player = Matsu.INSTANCE.getProxy().getPlayer(queue.getFirst()).get();
+        if (boostEnabled && GenerateBoost()) {
+            LinkedList<UUID> boostQueue = new LinkedList<>();
+            for (UUID uuid : queue) {
+                Player unfilteredPlayer = Matsu.INSTANCE.getProxy().getPlayer(uuid).get();
+                if (unfilteredPlayer.hasPermission(boostPermission)) {
+                    boostQueue.add(unfilteredPlayer.getUniqueId());
+                }
+            }
+
+            if (!boostQueue.isEmpty()) {
+                player = Matsu.INSTANCE.getProxy().getPlayer(boostQueue.getFirst()).get();
+                if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().info(String.format("Queue %s was boosted!", name));}
+            }
+        }
+
         player.sendMessage(Component.text(Matsu.CONFIG.connectingMessage.replace("&", "\247")));
         Matsu.CONFIG.slotsMap.get(slots).occupySlot(player);
-        queue.remove(queue.getFirst());
+        queue.remove(player.getUniqueId());
         player.createConnectionRequest(Matsu.destinationServerInfo).connect();
         if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().info(player.getUsername() + " transferred to destination server");}
     }
@@ -123,4 +148,11 @@ public class MatsuQueue implements IMatsuQueue {
         return footer.replace("&", "\247");
     }
 
+    public Boolean GenerateBoost() {
+        float random = generator.nextFloat();
+        if (Matsu.CONFIG.verbose) {
+            Matsu.INSTANCE.getLogger().info(String.format("Boost Generator \nrandom float = %s \n1/Boost Ratio = %s \nBoost: %s", random, 1 / boostRatio, random > (1 / boostRatio)));
+        }
+        return random > (1 / boostRatio);
+    }
 }

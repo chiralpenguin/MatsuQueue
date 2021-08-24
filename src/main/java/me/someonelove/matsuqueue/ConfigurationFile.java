@@ -83,7 +83,11 @@ public class ConfigurationFile {
             final String slot = parser.getString("queues." + queue + ".slots");
             if (!slots.contains(slot)) continue;
             final String permission = parser.getString("queues." + queue + ".permission");
-            IMatsuQueue q = new MatsuQueue(queue, priority, slot, permission);
+            final Boolean useBoost = parser.getBoolean("queues." + queue + ".boost.enabled");
+            final float boostRatio = parser.getFloat("queues." + queue + ".boost.ratio");
+            final String boostPerm = parser.getString("queues." + queue + ".boost.permission");
+            final String fullBoostPerm =  String.format("matsuqueue.%s.%s.%s", slotsMap.get(slot).getPermission(), permission, boostPerm);
+            IMatsuQueue q = new MatsuQueue(queue, priority, slot, permission, useBoost, boostRatio, fullBoostPerm);
             Matsu.queuePermissionCache.put("." + permission, queue);
             q.setTabText(parser.getString("queues." + queue + ".tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n"),
                     parser.getString("queues." + queue + ".tabFooter", "\\n&6You can donate at https://paypal.me/eatsasha for priority access to the server.\\n"));

@@ -35,6 +35,10 @@ queues:
     priority: 2
     slots: standard
     permission: default
+    boost:
+      enabled: false
+      ratio: 1.5
+      permission: boost
     tabHeader: '\n&dMatsuQueue\n\n&6Server is full\n&6Position in queue: &l{pos}\n'
     tabFooter: \n&6You can donate at (Donation Link) for priority queue, or for a
       reserved slot.\n
@@ -42,12 +46,20 @@ queues:
     priority: 1
     slots: standard
     permission: priority
+    boost:
+      enabled: false
+      ratio: 2.0
+      permission: boost
     tabHeader: '\n&dMatsuQueue\n\n&6Server is full\n&6Position in queue: &l{pos}\n'
     tabFooter: \n&6Thank you for donating for priority queue!\n
   reserved:
     priority: 1
     slots: reserved
     permission: reserved
+    boost:
+      enabled: false
+      ratio: 1.0
+      permission: boost
     tabHeader: '\n&dMatsuQueue\n\n&6Server is full\n&6Position in queue: &l{pos}\n'
     tabFooter: \n&6Thank yo ufor donating for a reserved slot!\n
 
