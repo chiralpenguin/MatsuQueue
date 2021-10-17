@@ -226,8 +226,9 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
         AtomicInteger pos = new AtomicInteger(0);
         associatedQueues.values().stream().sorted(Comparator.comparingInt(IMatsuQueue::getPriority)).forEach(queue -> {
             for (UUID uuid : queue.getQueue()) {
-                Player player = Matsu.INSTANCE.getProxy().getPlayer(uuid).get();
-                if (player != null) {
+                Optional<Player> playerOptional = Matsu.INSTANCE.getProxy().getPlayer(uuid);
+                if (playerOptional.isPresent()) {
+                    Player player = playerOptional.get();
                     player.sendMessage(Component.text(str.replace("{pos}", (pos.get() + 1) + "")));
 
                     // Only update the player's tab header if they are still in the queue server, otherwise, only send the chat message

@@ -88,7 +88,7 @@ public class Matsu {
         CONFIG.slotsMap.forEach((str, cluster) -> {
             for (UUID slot : cluster.getSlots()) {
                 Optional<Player> player = this.getProxy().getPlayer(slot);
-                if (!player.isPresent() || !player.get().isActive() || !player.get().getCurrentServer().get().getServer().equals(destinationServerInfo)) {
+                if (player.isEmpty() || !player.get().isActive() || slot == null || !player.get().getCurrentServer().get().getServer().equals(destinationServerInfo)) {
                     removalList.add(slot);
                     if (CONFIG.verbose) {getLogger().info("Purging Player: " + player.get().getUsername() + player.get().getCurrentServer().get().getServer().getServerInfo().getName() + player.get().getCurrentServer().get().getServer().equals(destinationServerInfo));}
                 }
@@ -103,7 +103,7 @@ public class Matsu {
     		cluster.getAssociatedQueues().forEach((name, queue) -> {
     			for (UUID id : queue.getQueue()) {
     				Optional<Player> player = this.getProxy().getPlayer(id);
-    				if (!player.isPresent()|| !player.get().isActive() || player.get().getCurrentServer().get().getServer().equals(destinationServerInfo)) {
+    				if (player.isEmpty() || !player.get().isActive() || id == null || player.get().getCurrentServer().get().getServer().equals(destinationServerInfo)) {
     					removalList.add(id);
                         if (CONFIG.verbose) {getLogger().info("Purging Player: " + player.get().getUsername() + player.get().getCurrentServer().get().getServer().getServerInfo().getName() + player.get().getCurrentServer().get().getServer().equals(queueServerInfo));}
     				}
