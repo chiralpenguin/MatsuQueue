@@ -233,8 +233,12 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
 
                     // Only update the player's tab header if they are still in the queue server, otherwise, only send the chat message
                     if (player.getCurrentServer().get().getServer().equals(Matsu.queueServerInfo)) {
+                        String footer = queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "");
+                        if (player.hasPermission(queue.getBoostPermission())) {
+                            footer = footer + queue.getBoostFooter();
+                        }
                         player.getTabList().setHeaderAndFooter(Component.text(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
-                                Component.text(queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "")));
+                                    Component.text(footer));
                     }
 
                 }
@@ -254,8 +258,12 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
                 Player player = Matsu.INSTANCE.getProxy().getPlayer(uuid).get();
                 if (player.equals(targetPlayer)) {
                     player.sendMessage(Component.text(str.replace("{pos}", (pos.get() + 1) + "")));
+                    String footer = queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "");
+                    if (player.hasPermission(queue.getBoostPermission())) {
+                        footer = footer + queue.getBoostFooter();
+                    }
                     player.getTabList().setHeaderAndFooter(Component.text(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
-                            Component.text(queue.getTabFooter().replace("{pos}", (pos.get() + 1) + "")));
+                            Component.text(footer));
                 }
                 pos.getAndIncrement();
             }

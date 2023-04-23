@@ -27,12 +27,18 @@ public interface IMatsuQueue {
 
     String getPermission();
 
+    String getBoostPermission();
+
     LinkedList<UUID> getQueue();
 
     void setTabText(String header, String footer);
 
+    void setBoostFooter(String boostFooter);
+
     String getTabHeader();
 
     String getTabFooter();
+
+    String getBoostFooter();
 
 }

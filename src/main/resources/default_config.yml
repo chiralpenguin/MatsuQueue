@@ -13,6 +13,7 @@ verbose: false
 # Messages
 serverFullMessage: '&6Server is full'
 connectingMessage: '&6Connecting to the server...'
+boostMessage: '&6You have been boosted ahead of other players in your queue!'
 positionMessage: '&6Your position in queue is &l{pos}'
 queueLeaveMessage: '&6You have left the queue. Do &5/queuejoin&6 to rejoin.'
 queueLeaveErrorMessage: '&6You are not in the queue! Do &5/queuejoin&6 to join.'
@@ -39,9 +40,10 @@ queues:
       enabled: false
       ratio: 1.5
       permission: boost
+      boostFooter: '\n&6You have a queue boost active!'
     tabHeader: '\n&dMatsuQueue\n\n&6Server is full\n&6Position in queue: &l{pos}\n'
-    tabFooter: \n&6You can donate at (Donation Link) for priority queue, or for a
-      reserved slot.\n
+    tabFooter: '\n&6You can donate at (Donation Link) for priority queue, or for a
+        reserved slot.\n'
   priority:
     priority: 1
     slots: standard
@@ -50,8 +52,9 @@ queues:
       enabled: false
       ratio: 2.0
       permission: boost
+      boostFooter: '\n&6You have a queue boost active!'
     tabHeader: '\n&dMatsuQueue\n\n&6Server is full\n&6Position in queue: &l{pos}\n'
-    tabFooter: \n&6Thank you for donating for priority queue!\n
+    tabFooter: '\n&6Thank you for donating for priority queue!\n'
   reserved:
     priority: 1
     slots: reserved
@@ -60,8 +63,9 @@ queues:
       enabled: false
       ratio: 1.0
       permission: boost
+      boostFooter: '\n&6You have a queue boost active!'
     tabHeader: '\n&dMatsuQueue\n\n&6Server is full\n&6Position in queue: &l{pos}\n'
-    tabFooter: \n&6Thank yo ufor donating for a reserved slot!\n
+    tabFooter: '\n&6Thank yo ufor donating for a reserved slot!\n'
 
 # Slot & Queue lists
 queuenames:

@@ -27,6 +27,7 @@ public class ConfigurationFile {
     public boolean verbose;
     public String serverFullMessage;
     public String connectingMessage;
+    public String boostMessage;
     public String positionMessage;
     public String leaveMessage;
     public String leaveErrorMessage;
@@ -60,6 +61,7 @@ public class ConfigurationFile {
         verbose = Boolean.parseBoolean(parser.getString("verbose", "false"));
         serverFullMessage = parser.getString("serverFullMessage", "&6Server is full");
         connectingMessage = parser.getString("connectingMessage", "&6Connecting to the server...");
+        boostMessage = parser.getString("boostMessage");
         positionMessage = parser.getString("positionMessage", "&6Your position in queue is &l{pos}");
         leaveMessage = parser.getString("queueLeaveMessage", "&6You have left the queue. Do &5/queuejoin &6to rejoin");
         leaveErrorMessage = parser.getString("queueLeaveErrorMessage", "&6You are not in the queue! Do &5/queuejoin&6 to join.");
@@ -91,6 +93,7 @@ public class ConfigurationFile {
             Matsu.queuePermissionCache.put("." + permission, queue);
             q.setTabText(parser.getString("queues." + queue + ".tabHeader", "\\n&dMatsuQueue\\n\\n&6Server is full\\n&6Position in queue: &l{pos}\\n"),
                     parser.getString("queues." + queue + ".tabFooter", "\\n&6You can donate at https://paypal.me/eatsasha for priority access to the server.\\n"));
+            q.setBoostFooter(parser.get("queues." + queue + ".boost.boostFooter", "'\\n&6You have a queue boost active!'\\n"));
             slotsMap.get(slot).associateQueue(q);
             if (this.verbose) {Matsu.INSTANCE.getLogger().info("Discovered valid queue " + queue + " associated to slot type " + slot);}
 

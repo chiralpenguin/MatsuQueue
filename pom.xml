@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>me.somebodylove</groupId>
   <artifactId>MatsuQueue</artifactId>
-  <version>3.0</version>
+  <version>3.1</version>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>

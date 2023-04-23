@@ -16,12 +16,14 @@ public class MatsuQueue implements IMatsuQueue {
     public final String slots;
     private boolean boostEnabled;
     private float boostRatio;
+
     private String boostPermission;
 
     private Random generator = new Random();
 
     private String header;
     private String footer;
+    private String boostFooter;
 
     private LinkedList<UUID> queue = new LinkedList<>();
 
@@ -78,6 +80,7 @@ public class MatsuQueue implements IMatsuQueue {
 
             if (!boostQueue.isEmpty()) {
                 player = Matsu.INSTANCE.getProxy().getPlayer(boostQueue.getFirst()).get();
+                player.sendMessage(Component.text(Matsu.CONFIG.boostMessage.replace("&", "\247")));
                 if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().info(String.format("Queue %s was boosted!", name));}
             }
         }
@@ -128,6 +131,12 @@ public class MatsuQueue implements IMatsuQueue {
     }
 
     @Override
+    public String getBoostPermission() {
+        return boostPermission;
+    }
+
+
+    @Override
     public final LinkedList<UUID> getQueue() {
         return queue;
     }
@@ -139,6 +148,11 @@ public class MatsuQueue implements IMatsuQueue {
     }
 
     @Override
+    public void setBoostFooter(String boostFooter) {
+        this.boostFooter = boostFooter.replace("\\n", "\n");
+    }
+
+    @Override
     public String getTabHeader() {
         return header.replace("&", "\247");
     }
@@ -146,6 +160,11 @@ public class MatsuQueue implements IMatsuQueue {
     @Override
     public String getTabFooter() {
         return footer.replace("&", "\247");
+    }
+
+    @Override
+    public String getBoostFooter() {
+        return boostFooter.replace("&", "\247");
     }
 
     public Boolean GenerateBoost() {
