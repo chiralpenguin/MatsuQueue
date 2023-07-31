@@ -3,6 +3,7 @@
 bin/
 build/
 target/
+.gradle/
 
 # Ignore Eclipse IDE files
 .classpath
