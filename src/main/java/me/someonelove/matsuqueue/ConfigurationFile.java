@@ -24,7 +24,9 @@ public class ConfigurationFile {
     public String bypassPermission;
     public boolean perQueuePos;
     public boolean usePriorityWeighting;
+    public int maxConcurrentAccounts;
     public boolean verbose;
+
     public String serverFullMessage;
     public String connectingMessage;
     public String boostMessage;
@@ -34,6 +36,8 @@ public class ConfigurationFile {
     public String joinMessage;
     public String joinErrorMessage;
     public String destinationJoinErrorMessage;
+    public String excessAccountWarningMessage;
+    public String excessAccountKickMessage;
     public ConcurrentHashMap<String, IMatsuSlotCluster> slotsMap = new ConcurrentHashMap<>();
 
     public ConfigurationFile() {
@@ -58,7 +62,9 @@ public class ConfigurationFile {
         bypassPermission = parser.getString("bypassPermission");
         perQueuePos = Boolean.parseBoolean(parser.getString("perQueuePosition"));
         usePriorityWeighting = Boolean.parseBoolean(parser.getString("usePriorityWeighting"));
+        maxConcurrentAccounts = Integer.parseInt(parser.getString("maxConcurrentAccounts"));
         verbose = Boolean.parseBoolean(parser.getString("verbose", "false"));
+
         serverFullMessage = parser.getString("serverFullMessage", "&6Server is full");
         connectingMessage = parser.getString("connectingMessage", "&6Connecting to the server...");
         boostMessage = parser.getString("boostMessage");
@@ -68,6 +74,8 @@ public class ConfigurationFile {
         destinationJoinErrorMessage = parser.getString("destinationJoinErrorMessage", "&cYou cannot connect directly to the destination server. Do &5/queuejoin &cinstead.");
         joinMessage = parser.getString("queueJoinMessage", "&6You have rejoined the queue. Do &5/queueleave &6to leave.");
         joinErrorMessage = parser.getString("queueJoinErrorMessage", "&6You are already in the queue or destination server! Do &5/queueleave &6to leave.");
+        excessAccountWarningMessage = parser.get("excessAccountWarningMessage", "&cYou have exceeded the limit of concurrent sessions. This account may be kicked if the server is full.");
+        excessAccountKickMessage = parser.get("excessAccountKickMessage", "&4Connection closed - &cThere are too many concurrent sessions.");
         final List<String> slots = parser.getStringList("slotnames");
         for (final String slot : slots) {
             if (!parser.exists("slots." + slot)) continue;

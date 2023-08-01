@@ -16,6 +16,7 @@ import me.someonelove.matsuqueue.queue.impl.MatsuSlotCluster;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
+import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Plugin(id = "matsuqueue", name = "MatsuQueue", version = "3.0",
         description = "Fork of MastuQueue adapted for Purity Vanilla",
-        authors = "Sasha, updated by nitricspace",
+        authors = "Sasha, updated by chiralpenguin",
         dependencies = {@Dependency(id = "luckperms", optional = false)})
 public class Matsu {
     private final ProxyServer server;
@@ -38,6 +39,7 @@ public class Matsu {
     public static LinkedHashMap<String, String> queuePermissionCache = new LinkedHashMap<>();
     public static RegisteredServer destinationServerInfo;
     public static RegisteredServer queueServerInfo;
+    public static ConnectionManager connectionManager;
 
     public static boolean queueServerOk = true;
     public static boolean destinationServerOk = true;
@@ -79,8 +81,9 @@ public class Matsu {
         UpdateQueueTask = this.server.getScheduler().buildTask(INSTANCE, new UpdateQueues()).delay(30L, TimeUnit.SECONDS).repeat(10L, TimeUnit.SECONDS).schedule();
         if (CONFIG.verbose) {getLogger().info("Verbose logging ENABLED. Disable this in config.yml to reduce messages.");}
 
-        getLogger().info("MatsuQueue has loaded.");
+        connectionManager = new ConnectionManager();
 
+        getLogger().info("MatsuQueue has loaded.");
     }
 
     private void purgeSlots() {

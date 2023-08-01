@@ -237,7 +237,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
                         if (player.hasPermission(queue.getBoostPermission())) {
                             footer = footer + queue.getBoostFooter();
                         }
-                        player.getTabList().setHeaderAndFooter(Component.text(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
+                        player.sendPlayerListHeaderAndFooter(Component.text(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
                                     Component.text(footer));
                     }
 
@@ -262,7 +262,7 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
                     if (player.hasPermission(queue.getBoostPermission())) {
                         footer = footer + queue.getBoostFooter();
                     }
-                    player.getTabList().setHeaderAndFooter(Component.text(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
+                    player.sendPlayerListHeaderAndFooter(Component.text(queue.getTabHeader().replace("{pos}", (pos.get() + 1) + "")),
                             Component.text(footer));
                 }
                 pos.getAndIncrement();
@@ -284,8 +284,16 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
     }
 
     public static IMatsuSlotCluster getSlotFromPlayer(Player player) {
-        IMatsuSlotCluster slot = null;
         User lplayer = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
+        return getSlotFromlPlayer(lplayer);
+    }
+
+    public static IMatsuSlotCluster getSlotFromlPlayer(User lplayer) {
+        IMatsuSlotCluster slot = null;
+        if (lplayer == null) {
+            return Matsu.CONFIG.slotsMap.get(Matsu.slotPermissionCache.get("matsuqueue.default."));
+        }
+
         Collection<Node> permissionNodes = lplayer.resolveInheritedNodes(QueryOptions.nonContextual());
         Set<String> perms = permissionNodes.stream().filter(NodeType.PERMISSION::matches).map(NodeType.PERMISSION::cast).map(PermissionNode::getKey).collect(Collectors.toSet());
         Set<String> negatedPerms = permissionNodes.stream().filter(Node::isNegated).filter(NodeType.PERMISSION::matches).map(NodeType.PERMISSION::cast).map(PermissionNode::getKey).collect(Collectors.toSet());

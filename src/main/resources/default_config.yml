@@ -8,6 +8,7 @@ destinationServerKey: main
 bypassPermission: matsuqueue.skip
 perQueuePosition: true
 usePriorityWeighting: false # Warning: This is an experimental feature
+maxConcurrentAccounts: 3
 verbose: false
 
 # Messages
@@ -20,6 +21,8 @@ queueLeaveErrorMessage: '&6You are not in the queue! Do &5/queuejoin&6 to join.'
 queueJoinMessage: '&6You have rejoined the queue. Do &5/queueleave &6to leave.'
 queueJoinErrorMessage: '&6You are already in the queue or destination server! Do &5/queueleave &6to leave.'
 destinationJoinErrorMessage: '&cYou cannot connect directly to the destination server. Do &5/queuejoin &cinstead.'
+excessAccountWarningMessage: '&cYou have exceeded the limit of concurrent sessions. This account may be kicked if the server is full.'
+excessAccountKickMessage: '&4Connection closed - &cThere are too many concurrent sessions.'
 
 # Server Slots https://github.com/chiralpenguin/MatsuQueue/wiki/Slots-and-Queues
 slots:
