@@ -2,6 +2,7 @@ package me.someonelove.matsuqueue;
 
 import me.someonelove.matsuqueue.queue.IMatsuSlotCluster;
 import me.someonelove.matsuqueue.queue.impl.MatsuSlotCluster;
+import net.luckperms.api.LuckPermsProvider;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -48,7 +49,7 @@ public class ConnectionManager {
         excessAccounts.get(slot).add(player);
     }
 
-    public void removeExcessAccount(IMatsuSlotCluster slot, String player, InetAddress address) {
+    public void removeExcessAccount(IMatsuSlotCluster slot, String player) {
         removeConnection(player);
         excessAccounts.get(slot).remove(player);
     }
@@ -58,7 +59,7 @@ public class ConnectionManager {
     }
 
     public boolean isExcess(String player) {
-        IMatsuSlotCluster slot = MatsuSlotCluster.getSlotFromPlayer(Matsu.INSTANCE.getProxy().getPlayer(player).get());
+        IMatsuSlotCluster slot = MatsuSlotCluster.getSlotFromUsername(player);
         return excessAccounts.get(slot).contains(player);
     }
 

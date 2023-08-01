@@ -283,6 +283,11 @@ public class MatsuSlotCluster implements IMatsuSlotCluster {
         this.queuePool = new QueuePool(associatedQueues);
     }
 
+    public static IMatsuSlotCluster getSlotFromUsername(String username) {
+        User lplayer = LuckPermsProvider.get().getUserManager().getUser(username);
+        return getSlotFromlPlayer(lplayer);
+    }
+
     public static IMatsuSlotCluster getSlotFromPlayer(Player player) {
         User lplayer = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
         return getSlotFromlPlayer(lplayer);

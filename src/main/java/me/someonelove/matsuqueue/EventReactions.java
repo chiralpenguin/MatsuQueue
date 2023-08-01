@@ -31,6 +31,12 @@ public class EventReactions {
             slot.onPlayerLeave(player);
         });
 
+        if (Matsu.connectionManager.isExcess(player.getUsername())) {
+            IMatsuSlotCluster slot = MatsuSlotCluster.getSlotFromUsername(player.getUsername());
+            Matsu.connectionManager.removeExcessAccount(slot, player.getUsername());
+            return;
+        }
+
         Matsu.connectionManager.removeConnection(player.getUsername());
     }
 
