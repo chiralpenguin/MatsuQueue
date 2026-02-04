@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.purityvanilla"
-version = "4.0-SNAPSHOT"
+version = "4.1"
 
 repositories {
     mavenCentral()
@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.velocitypowered", "velocity-api", "3.1.1")
+    implementation("com.velocitypowered", "velocity-api", "3.5.0-SNAPSHOT")
     implementation("net.luckperms" ,"api", "5.4")
     implementation("org.yaml", "snakeyaml", "2.0")
 }

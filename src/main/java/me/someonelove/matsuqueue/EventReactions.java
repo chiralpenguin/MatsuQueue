@@ -7,17 +7,22 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
 import me.someonelove.matsuqueue.queue.IMatsuSlotCluster;
 import me.someonelove.matsuqueue.queue.impl.MatsuSlotCluster;
 import net.kyori.adventure.text.Component;
+import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.node.Node;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EventReactions {
@@ -55,6 +60,11 @@ public class EventReactions {
             return;
         }
 
+        if (!Matsu.joinTracker.playerJoinedBefore(player)) {
+            Matsu.joinTracker.playerJoin(player);
+            handleFirstJoinBypass(player);
+        }
+
         if (!slot.needsQueueing() || e.getPlayer().hasPermission(Matsu.CONFIG.bypassPermission)) {
             e.setInitialServer(Matsu.destinationServerInfo);
             if (Matsu.connectionManager.isExcess(player.getUsername())) {
@@ -71,6 +81,23 @@ public class EventReactions {
         }
 
         e.setInitialServer(Matsu.queueServerInfo);
+    }
+
+    public void handleFirstJoinBypass(Player player) {
+        if (Matsu.CONFIG.firstJoinBypasshours < 1) return;
+
+        LuckPerms luckPerms = LuckPermsProvider.get();
+        luckPerms.getUserManager().loadUser(player.getUniqueId()).thenAccept(user -> {
+            user.data().add(Node.builder(Matsu.CONFIG.bypassPermission)
+                    .expiry(Matsu.CONFIG.firstJoinBypasshours, TimeUnit.HOURS)
+                    .build());
+            luckPerms.getUserManager().saveUser(user);
+        });
+
+        Matsu.INSTANCE.getLogger().info(String.format("Player %s received %d hours of queue bypass",
+                player.getUsername(),
+                Matsu.CONFIG.firstJoinBypasshours
+        ));
     }
 
     @Subscribe
@@ -132,6 +159,15 @@ public class EventReactions {
                 slot.onPlayerLeave(e.getPlayer());
                 if (Matsu.CONFIG.verbose) {Matsu.INSTANCE.getLogger().info(String.format("Removed player: %s from slot: %s", e.getPlayer().getUsername(), slot.getSlotName()));}
             });
+        }
+    }
+
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        try  {
+            Matsu.joinTracker.saveJoinedPlayers("plugins/MatsuQueue/joined_players.txt");
+        } catch (IOException e) {
+            Matsu.INSTANCE.getLogger().error("Failed to save joined_players.txt!");
         }
     }
 }

@@ -11,21 +11,21 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
+import jakarta.inject.Inject;
 import me.someonelove.matsuqueue.queue.IMatsuSlotCluster;
 import me.someonelove.matsuqueue.queue.impl.MatsuSlotCluster;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
-import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Plugin(id = "matsuqueue", name = "MatsuQueue", version = "3.0",
+@Plugin(id = "matsuqueue", name = "MatsuQueue", version = "4.1",
         description = "Fork of MastuQueue adapted for Purity Vanilla",
         authors = "Sasha, updated by chiralpenguin",
         dependencies = {@Dependency(id = "luckperms", optional = false)})
@@ -40,12 +40,13 @@ public class Matsu {
     public static RegisteredServer destinationServerInfo;
     public static RegisteredServer queueServerInfo;
     public static ConnectionManager connectionManager;
+    public static JoinTracker joinTracker;
 
     public static boolean queueServerOk = true;
     public static boolean destinationServerOk = true;
 
     public ScheduledTask UpdateQueueTask = null;
-    
+
     @Inject
     public Matsu(ProxyServer server, Logger logger) {
         this.server = server;
@@ -82,6 +83,9 @@ public class Matsu {
         if (CONFIG.verbose) {getLogger().info("Verbose logging ENABLED. Disable this in config.yml to reduce messages.");}
 
         connectionManager = new ConnectionManager();
+
+        joinTracker = new JoinTracker(logger);
+        scheduleSaveJoinedPlayers();
 
         getLogger().info("MatsuQueue has loaded.");
     }
@@ -150,6 +154,16 @@ public class Matsu {
             if (CONFIG.verbose) {getLogger().info("Purged queues and updated position messages.");}
 		}
     	
+    }
+
+    public void scheduleSaveJoinedPlayers() {
+        server.getScheduler().buildTask(INSTANCE, () -> {
+            try {
+                joinTracker.saveJoinedPlayers("plugins/MatsuQueue/joined_players.txt");
+            } catch (IOException e) {
+                logger.error("Failed to save joined_players.txt - contents will be reset upon restart");
+            }
+        }).repeat(10, TimeUnit.SECONDS).schedule();
     }
     
     public class UpdateSlotsCommand implements SimpleCommand {

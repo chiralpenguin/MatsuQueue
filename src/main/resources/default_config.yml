@@ -6,8 +6,9 @@
 queueServerKey: queue
 destinationServerKey: main
 bypassPermission: matsuqueue.skip
+firstJoinBypassHours: -1
 perQueuePosition: true
-usePriorityWeighting: false # Warning: This is an experimental feature
+usePriorityWeighting: false
 maxConcurrentAccounts: 3
 verbose: false
 

@@ -22,6 +22,7 @@ public class ConfigurationFile {
     public String queueServerKey;
     public String destinationServerKey;
     public String bypassPermission;
+    public int firstJoinBypasshours;
     public boolean perQueuePos;
     public boolean usePriorityWeighting;
     public int maxConcurrentAccounts;
@@ -60,6 +61,7 @@ public class ConfigurationFile {
         queueServerKey = parser.getString("queueServerKey", "queue");
         destinationServerKey = parser.getString("destinationServerKey", "main");
         bypassPermission = parser.getString("bypassPermission");
+        firstJoinBypasshours = parser.getInt("firstJoinBypassHours");
         perQueuePos = Boolean.parseBoolean(parser.getString("perQueuePosition"));
         usePriorityWeighting = Boolean.parseBoolean(parser.getString("usePriorityWeighting"));
         maxConcurrentAccounts = Integer.parseInt(parser.getString("maxConcurrentAccounts"));
